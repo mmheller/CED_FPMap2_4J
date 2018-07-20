@@ -1,0 +1,352 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+{% load staticfiles %}
+
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--The viewport meta tag is used to improve the presentation and behavior of the samples on iOS devices-->
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>Greater Sage Grouse: Conservation Efforts</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.20/dijit/themes//tundra/tundra.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/3.20/esri/css/esri.css" />
+
+
+    <!--<link rel="stylesheet" href="https://js.arcgis.com/3.14/dijit/themes//tundra/tundra.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/3.14/esri/css/esri.css" />-->
+    <!--  <link rel="stylesheet" href="https://js.arcgis.com/3.12/dijit/themes//tundra/tundra.css"/>
+      <link rel="stylesheet" href="https://js.arcgis.com/3.12/esri/css/esri.css"/>-->
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+    <!--<link rel="stylesheet" type="text/css" href="Styles/panel.css" />-->
+    <link rel="stylesheet" type="text/css" href="{% static 'ced_main/images/grsgmap/Styles/panel.css' %}"/>
+
+
+<!--    <style>
+        html, body {
+            height: 98%;
+            width: 99.95%;
+            margin: 0.00005%;
+            background-color: rgb(127, 105, 127);
+        }
+    </style>-->
+
+    <style type="text/css">
+        .auto-style1 {
+            vertical-align: middle;
+            text-align: right;
+            background-color: rgb(151, 118, 123);
+            color: #FFFFFF;
+            font-weight: bold;
+            height: 59px;
+        }
+
+    </style>
+
+    <!--<script type="text/javascript">var dojoConfig = {paths: { extras: location.pathname.replace(/\/[^/]+$/, "") + "/extras" }};</script>-->
+    <script type="text/javascript"> var dojoConfig = { paths: { extras: "{% static 'ced_main/images/grsgmap/extras' %}"} };</script>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://js.arcgis.com/3.20/"></script>
+    <!--<script type="text/javascript" src="https://js.arcgis.com/3.14/"></script>-->
+    <!--<script type="text/javascript" src="https://js.arcgis.com/3.12/"></script>-->
+    <!--<script src="https://raw.githubusercontent.com/Chaussette/esri.symbol.MultiLineTextSymbol/master/esri.symbol.MultiLineTextSymbol.js"></script>-->
+
+
+    <script type="text/javascript">
+    dojo.require("dijit.layout.TabContainer");
+    dojo.require("dijit.layout.ContentPane");
+    var app = {};
+    require([
+        "esri/map", "esri/layers/FeatureLayer", "esri/dijit/Legend", "esri/urlUtils",
+        "dojo/_base/array", "dojo/parser", "esri/config", "dojo/dom", "dojo/dom-class", "dojo/on", "extras/PS_MeasSiteSearch4Definition", "extras/PS_ReturnQuerySt",
+        "dijit/form/CheckBox", "extras/PS_MeasSiteSearch_SetVisableQueryDef", "extras/MH_Zoom2FeatureLayer", "extras/MH_Setup",
+        "extras/MH_FeatureCount", "extras/MH_Query4Summary",
+        "esri/tasks/RelationshipQuery", "esri/symbols/SimpleMarkerSymbol", "dojo/_base/Color", "esri/dijit/Scalebar",
+        "esri/dijit/Geocoder", "extras/PS_Identify", "extras/CK_AutoCompleteSearchAndZoom", "extras/PS_PopUniqueQueryInterfaceValues",
+        "esri/geometry/webMercatorUtils", "esri/dijit/BasemapGallery", "dojo/mouse", "dojo/query", "esri/tasks/FindTask", "esri/tasks/FindParameters",
+        "esri/arcgis/utils",
+        "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+        "dijit/layout/AccordionContainer", "dojo/domReady!"
+        ],
+
+    function (Map, FeatureLayer, Legend, urlUtils,
+                arrayUtils, parser, esriConfig, dom, domClass, on, PS_MeasSiteSearch4Definition, PS_ReturnQuerySt, CheckBox,
+                PS_MeasSiteSearch_SetVisableQueryDef, MH_Zoom2FeatureLayer, MH_Setup, MH_FeatureCount, MH_Query4Summary,
+                RelationshipQuery, SimpleMarkerSymbol,
+                Color, Scalebar, Geocoder, PS_Identify, CK_AutoCompleteSearchAndZoom, PS_PopUniqueQueryInterfaceValues,
+                webMercatorUtils, BasemapGallery, mouse, query, FindTask, FindParameters) {
+
+        esriConfig.defaults.io.corsEnabledServers.push("https://utility.arcgis.com")
+
+        parser.parse();
+
+        var strURL = localStorage.getItem("ls_strTheme1_URL");
+        var strDefQuery = localStorage.getItem("ls_strDefQuery");
+        var strDefQuery2 = localStorage.getItem("ls_strDefQuery2");
+        //var strDefQuery3 = localStorage.getItem("ls_strDefQuery3");
+        var strQueryLabelText = localStorage.getItem("ls_strQueryLabelText");
+
+        if ((strQueryLabelText == "") | (strQueryLabelText == "undefined")) {
+            strQueryLabelText = "<b>USER SELECTED QUERY FILTERS:</b>  None selected"
+        } else {
+            strQueryLabelText = "<b>USER SELECTED QUERY FILTERS:</b>  " + strQueryLabelText.substring(0, strQueryLabelText.length - 2);
+        }
+
+        var div = document.getElementById("dFilterParameters");
+        div.innerHTML = strQueryLabelText;
+
+
+        app.gQuerySummary = new MH_Query4Summary({ strURL: strURL }); // instantiate the class
+
+        app.gQuerySummary.Summarize(strDefQuery, strDefQuery2, true);
+
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+        var yyyy = today.getFullYear();
+        today = mm + '/' + dd + '/' + yyyy;
+        document.getElementById('time').innerHTML = today;
+
+        function getTokens() {
+            var tokens = [];
+            var query = location.search;
+            query = query.slice(1);
+            query = query.split('&');
+            $.each(query, function (i, value) {
+                var token = value.split('|');
+                var key = decodeURIComponent(token[0]);
+                var data = decodeURIComponent(token[1]);
+                tokens[key] = data;
+            });
+            return tokens;
+        }
+
+        
+
+
+    });
+    </script>
+</head>
+   
+<body>
+
+                     
+           
+        <table style="width:100%; background-color: #f2f5f9; font-family: Arial;">
+            <tr>
+                <td class="auto-style1" colspan="5">
+                    <a href="http://conservationefforts.org/welcome/" target="_blank"> <img id="theImage4" border="0" src="http://conservationefforts.org/static/ced_main/images/ced_main/CEDlogo_white_180x31.png" style="position: absolute; left: 15px; top: 18px; height: 45px;" /></a>
+                    <a href="http://www.fws.gov" target="_blank"> <img id="theImage3" border="0" src="http://conservationefforts.org/static/ced_main/images/ced_main/USFWS_150x31.png" height="36"  /></a>&nbsp;&nbsp;
+                    <a href="http://www.usgs.gov" target="_blank"><img id="theImage2" border="0" src="http://conservationefforts.org/static/ced_main/images/ced_main/USGS_117x31.png" height="36"   /></a>
+                    <!--<a href="http://lccnetwork.org" target="_blank"> <img id="theImage1" border="0" src="https://conservationefforts.org/static/ced_main/images/ced_main/lcc_logo_centered_white_small.png" height="50"  /></a>-->
+                </td>
+            </tr>
+<!--            <tr>
+                <td class="auto-style1" colspan="3">
+                    <font size="8px" color="red"><b>DRAFT VERSION 2.0</b></font>
+                </td>
+            </tr>-->
+            <tr>
+                <td class="HTMLTable_styleMiddleLessPad" colspan="5">
+                    &nbsp;<b>Report Date:</b> <span id="time"></span>
+                    <img id="ImgResultsLoading" src="{% static 'ced_main/images/grsgmap/loading.gif' %}" style="height:15px" /></td>
+                    <!--<img id="ImgResultsLoading" src="images/loading.gif" style="height:15px" /></td>-->
+            </tr>
+            <tr>
+                <td class="HTMLTable_styleLeftLessPad" colspan="2">
+                    <div id="dTotalAcresQ2"></div><div id="dTotalCalcAcresQ2"></div>
+                    <div id="dTotalProjects"></div><div id="dTotalProjCalcAcresQ2"></div>
+                    <div id="dTotalProjectsNon"></div><div id="dTotalProjCalcAcresQ2"></div>
+                    <div id="dTotalPlans"></div><div id="dTotalPlanCalcAcresQ2"></div>
+                </td>
+                <td class="HTMLTable_styleMiddleLessPad"></td>
+                <td class="HTMLTable_styleLeftLessPad" colspan="2">
+                    <div id="dFilterParameters"></div>
+                    <div id="dMaxLastDataProviderEdit"></div>
+                    <div id="dMaxLastPubProc"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="HTMLTable_styleMiddleLessPad" colspan="2">
+                
+                </td>
+                <td></td>
+                <td colspan="2">
+                
+                </td>
+            </tr>
+
+            <tr>
+                <td class="HTMLTable_BannerRow" colspan="2">
+                    &nbsp;Implementing Party
+                </td>
+                <td class="HTMLTable_styleMiddle">
+                    &nbsp;
+                </td>
+                <td class="HTMLTable_BannerRow" colspan="2">
+                    &nbsp;Activity
+                </td>
+            </tr>
+          <!--  <tr>
+                <td class="HTMLTable_styleLeft">
+                    <div id="dTotalAcresQ2byImplementing_Party">
+                    </div>
+                </td>
+                <td class="HTMLTable_styleMiddle" colspan="2"></td>
+                <td class="HTMLTable_styleLeft">
+                    <div id="dTotalAcresQ2byActivity">
+                    </div>
+                </td>
+            </tr>-->
+            <tr>
+                <td class="HTMLTable_styleLeft" colspan="2">
+                    <div id="dNumofDistinctImpParties"></div>
+                    <div id="dNumberOfRecordsbyImpParty"></div>
+                </td>
+                <td class="HTMLTable_styleMiddle">
+                    &nbsp;
+                </td>
+                <td class="HTMLTable_styleLeft" colspan="2">
+                    <div id="dNumofDistinctActivities"></div>
+                    <div id="dNumberOfRecordsbyActivity"></div>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="HTMLTable_BannerRow" colspan="2">
+                    Office
+                    </td>
+                <td class="HTMLTable_styleMiddle"></td>
+                <td class="HTMLTable_BannerRow" colspan="2">
+                 SubActivities
+                    </td>
+                </td>
+            </tr>
+           <!-- <tr>
+                <td class=HTMLTable_styleLeft>
+                    <div id="dTotalAcresQ2byOffice">
+                    </div>
+                </td>
+                <td class="HTMLTable_styleMiddle" colspan="2"></td>
+                <td class="HTMLTable_styleLeft">
+                    <div id="dTotalAcresQ2bySubActivity">
+                    </div>
+                </td>
+            </tr>-->
+
+            <tr>
+                <td class="HTMLTable_styleLeft" colspan="2">
+                    <div id="dNumofDistinctOffices"></div>
+                    <div id="dNumberOfRecordsbyOffice"></div>
+                </td>
+                <td class="HTMLTable_styleMiddle"></td>
+                <td class="HTMLTable_styleLeft" colspan="2">
+                    <div id="dNumofDistinctSubActivities"></div>
+                    <div id="dNumberOfRecordsbySubActivity">
+                    </div>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="HTMLTable_BannerRow" colspan="5">
+<!--                    DRAFT This is under construciton!&nbsp;-->
+                    Overlapping Areas
+                    <!--</td>-->
+                </td>
+            </tr>
+        
+            <tr>
+                <td class="HTMLTable_styleLeft">
+                    <div id="dNumberofOverlappingStates"></div>
+
+                </td>
+                <td class="HTMLTable_styleLeft">
+                    <div id="dGISStates"></div>
+                </td>
+                <td class="HTMLTable_styleMiddle">
+                    &nbsp;
+                </td>
+                <td class="HTMLTable_styleLeft">
+                    <div id="dNumberofOverlappingPopAreas"></div>    
+                </td>
+                <td class="HTMLTable_styleLeft">
+                                       <div id="dGISPoP"></div>  
+                </td>
+            </tr>
+            <tr>
+                <td class="HTMLTable_styleLeft">
+                    <div id="dNumberofOverlappingMngmtZones"></div>
+
+                </td>
+                <td class="HTMLTable_styleLeft">
+                    <div id="dGISMZ"></div>
+                </td>
+                <td class="HTMLTable_styleMiddle"></td>
+                <td class="HTMLTable_styleLeft" colspan="2" >
+                    <div id="dGISSMA"></div>    
+                </td>
+            </tr>
+
+            <tr>
+                <td class="HTMLTable_styleLeft" colspan="2">
+                    <div id="dGISGHMA"></div>
+                </td>
+                <td class="HTMLTable_styleMiddle"></td>
+                <td class="HTMLTable_styleLeft" colspan="2" >
+                    <div id="dGISPHMA"></div>    
+                </td>
+            </tr>
+
+            <tr>
+                <td class="HTMLTable_styleLeft" colspan="2">
+                    <div id="dGISRMZ"></div>
+                </td>
+                <td class="HTMLTable_styleMiddle"></td>
+                <td class="HTMLTable_styleLeft" colspan="2" >
+                    <div id="dGISAB"></div>    
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="HTMLTable_styleLeft" colspan="2">
+                    <div id="dGISBD"></div>
+                </td>
+                <td class="HTMLTable_styleMiddle"></td>
+                <td class="HTMLTable_styleLeft" colspan="2" >
+                    <div id="dGISBP"></div>    
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="HTMLTable_styleLeft" colspan="2">
+                    <div id="dGISIDX"></div>
+                </td>
+                <td class="HTMLTable_styleMiddle"></td>
+                <td class="HTMLTable_styleLeft" colspan="2" >
+                    <div id="dGISPACSum"></div>  
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="HTMLTable_styleLeft" colspan="2">
+                    <div>Note: GIS Acre values were calculated using Conus Albers/NAD 83 projected coordinate system</div>    
+                </td>
+                <td class="HTMLTable_styleMiddle"></td>
+                <td class="HTMLTable_styleLeft" colspan="2" >
+                    <div></div>    
+                </td>
+            </tr>
+
+        </table>
+           
+
+</body>
+</html>
