@@ -1,6 +1,92 @@
 ﻿//Created By:  Matt Heller, Great Northern Landscape Conservation Cooperative / U.S. Fish and Wildlife Service
 //Date:        Oct 2014
 
+
+
+
+function btn_TextSummary_click() {
+    var strddlMatrix = document.getElementById("ddlMatrix").options[document.getElementById("ddlMatrix").selectedIndex].value;
+    var strddlEntry = document.getElementById("ddlEntry").options[document.getElementById("ddlEntry").selectedIndex].value;
+
+    var strddlStartYear = document.getElementById("ddlStartYear").options[document.getElementById("ddlStartYear").selectedIndex].value;
+    var strActivity = document.getElementById("ddlActivity").options[document.getElementById("ddlActivity").selectedIndex].value;  //get dropdown menu selection
+
+    var strSubActivity = document.getElementById("ddlSubActivity").options[document.getElementById("ddlSubActivity").selectedIndex].value;  //get dropdown menu selection
+
+    var strImpParty = document.getElementById("ddlImpParty").options[document.getElementById("ddlImpParty").selectedIndex].value;  //get dropdown menu selection
+    var strOffice = document.getElementById("ddlOffice").options[document.getElementById("ddlOffice").selectedIndex].value;  //get dropdown menu selection
+    var strState = document.getElementById("ddlState").options[document.getElementById("ddlState").selectedIndex].value;  //get dropdown menu selection
+    var strPopArea = document.getElementById("ddlPopArea").options[document.getElementById("ddlPopArea").selectedIndex].value;  //get dropdown menu selection
+    var strManagUnit = document.getElementById("ddlManagUnit").options[document.getElementById("ddlManagUnit").selectedIndex].value;  //get dropdown menu selection
+
+    var strQuery = "";
+    if (strddlMatrix !== "99") {
+        strQuery += "&TA=" + strddlMatrix.replace("Plan", "2").replace("Project", "3"); //TypeAct
+    }
+    if (strddlEntry !== "99") {
+        strQuery += "&ET=" + strddlEntry; //entry_type
+    }
+
+    if (strddlEntry !== "99") {
+        strQuery += "&StartYear=" + strddlStartYear; //entry_type
+    }
+
+    if (strActivity !== "99") {
+        strQuery += "&ACT=" + strActivity; //activity
+    }
+
+    if (strSubActivity !== "99") {
+        strQuery += "&SubACT=" + strSubActivity; //activity
+    }
+    if (strImpParty !== "99") {
+        strQuery += "&IP=" + strImpParty; //implementing_party
+    }
+    if (strOffice !== "99") {
+        strQuery += "&FO=" + strOffice; //implementing_party
+    }
+    if (strState != "99") {
+        strQuery += "&ST=" + strState; //State
+    }
+    if (strPopArea != "99") {
+        strQuery += "&POP=" + strPopArea; //pop area
+    }
+    if (strManagUnit != "99") {
+        strQuery += "&MU=" + strManagUnit; //management unit
+    }
+    if (strQuery !== "") {
+        var strURL = "https://conservationefforts.org/sgce/sgcedquery/" + strQuery.replace('&', '?');
+        window.open(strURL);
+    }
+}
+
+function getTokens() {
+    var tokens = [];
+    var query = location.search;
+    query = query.slice(1);
+    query = query.split('&');
+    $.each(query, function (i, value) {
+        var token = value.split('=');
+        var key = decodeURIComponent(token[0]);
+        var data = decodeURIComponent(token[1]);
+        tokens[key] = data;
+    });
+    return tokens;
+}
+
+function disableOrEnableFormElements(strFormName, strElementType, TorF) {
+    var pform = document.getElementById(strFormName);   // enable all the dropdown menu's while queries are running
+
+    if (pform != null) {
+        for (var i = 0; i < pform.elements.length; i++) {
+            if (pform.elements[i].type == strElementType) {
+                strID = pform.elements[i].id;
+                document.getElementById(strID).disabled = TorF;
+            }
+        }
+    }
+}
+
+
 function showLoading() {
     esri.show(app.loading);
     app.map.disableMapNavigation();
@@ -13,11 +99,16 @@ function hideLoading(error) {
     app.map.showZoomSlider();
 }
 
+$(function () {
+    $(document).tooltip();
+});
 
 function AllFiltersClear() {
     var strddlMatrix = document.getElementById("ddlMatrix").options[document.getElementById("ddlMatrix").selectedIndex].value;
     var strddlEntry = document.getElementById("ddlEntry").options[document.getElementById("ddlEntry").selectedIndex].value;
+    var strddlStartYear = document.getElementById("ddlStartYear").options[document.getElementById("ddlStartYear").selectedIndex].value;
     var strActivity = document.getElementById("ddlActivity").options[document.getElementById("ddlActivity").selectedIndex].value;  //get dropdown menu selection
+    var strSubActivity = document.getElementById("ddlSubActivity").options[document.getElementById("ddlSubActivity").selectedIndex].value;  //get dropdown menu selection
     var strImpParty = document.getElementById("ddlImpParty").options[document.getElementById("ddlImpParty").selectedIndex].value;  //get dropdown menu selection
     var strOffice = document.getElementById("ddlOffice").options[document.getElementById("ddlOffice").selectedIndex].value;  //get dropdown menu selection
     var strState = document.getElementById("ddlState").options[document.getElementById("ddlState").selectedIndex].value;  //get dropdown menu selection
@@ -28,7 +119,9 @@ function AllFiltersClear() {
 
     if (((strddlMatrix == "All") | (strddlMatrix == "99")) &
                  (strddlEntry == "99") &
+                 (strddlStartYear == "99") &
                  (strActivity == "99") &
+                 (strSubActivity == "99") &
                  (strImpParty == "99") &
                  (strOffice == "99") &
                  (strState = "99") &
@@ -40,10 +133,11 @@ function AllFiltersClear() {
 }
 
 define([
+         "esri/toolbars/draw", "esri/graphic", "extras/PS_MeasSiteSearch4Definition",
   "dojo/_base/declare",
   "dojo/_base/lang",
   "esri/request",
-  "dojo/promise/all",
+  "dojo/promise/all", "dojo/_base/array",
   "esri/urlUtils",
   "esri/layers/FeatureLayer",
   "esri/dijit/FeatureTable",
@@ -65,12 +159,16 @@ define([
   "esri/Color",
   "esri/renderers/SimpleRenderer",
   "esri/layers/LabelLayer",
-  "esri/symbols/TextSymbol"
+  "esri/symbols/TextSymbol",
+  "dijit/registry", "esri/geometry/webMercatorUtils",
+  "extras/MH_FeatureCount", "extras/PS_ReturnQuerySt", "extras/PS_MeasSiteSearch_SetVisableQueryDef", "extras/PS_PopUniqueQueryInterfaceValues", "dojo/parser"
+
   ], function (
-            declare, lang, esriRequest, all, urlUtils, FeatureLayer, FeatureTable,
+            Draw, Graphic, PS_MeasSiteSearch4Definition, declare, lang, esriRequest, all, arrayUtils, urlUtils, FeatureLayer, FeatureTable,
             SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, graphicsUtils, Query, All,
             ArcGISDynamicMapServiceLayer, CheckBox, Legend, Scalebar, Geocoder, dom, domClass,
-            mouse, on, BasemapGallery, Map, PS_Identify, Color, SimpleRenderer, LabelLayer, TextSymbol
+            mouse, on, BasemapGallery, Map, PS_Identify, Color, SimpleRenderer, LabelLayer, TextSymbol, registry, webMercatorUtils,
+            MH_FeatureCount, PS_ReturnQuerySt, PS_MeasSiteSearch_SetVisableQueryDef, PS_PopUniqueQueryInterfaceValues, parser
 ) {
 
       return declare([], {
@@ -85,40 +183,286 @@ define([
           },
 
           Phase1: function () {
-            //do nothing
+              disableOrEnableFormElements("dropdownForm", 'select-one', true); //disable/enable to avoid user clicking query options during pending queries
+              disableOrEnableFormElements("dropdownForm", 'button', true);  //disable/enable to avoid user clicking query options during pending queries
+
+              $(".divOpenStats").prop("onclick", null).off("click");
+
+
+              esriConfig.defaults.io.corsEnabledServers.push("https://utility.arcgis.com")
+              esriConfig.defaults.io.corsEnabledServers.push("https://sampleserver6.arcgisonline.com")
+              esriConfig.defaults.io.corsEnabledServers.push("https://services.arcgisonline.com");
+
+              document.getElementById("txtQueryResults").innerHTML = "-";
+              document.getElementById("dTotalProjectsQ").innerHTML = "-";
+              document.getElementById("dTotalNonProjectsQ").innerHTML = "-";
+              document.getElementById("dTotalPlansQ").innerHTML = "-";
+              document.getElementById("dTotalAcresQ").innerHTML = "-";
+
+              document.getElementById("ImgResultsLoading").style.visibility = "visible";
+
+              on(dom.byId("btn_clear"), "click", btn_clear_click);
+              on(dom.byId("btn_TextSummary"), "click", btn_TextSummary_click);
+              on(dom.byId("ddlMatrix"), "change", ddlMatrix_Change);
+              on(dom.byId("ddlEntry"), "change", ddlMatrix_Change);
+              on(dom.byId("ddlStartYear"), "change", ddlMatrix_Change);
+              on(dom.byId("ddlActivity"), "change", ddlMatrix_Change);
+              on(dom.byId("ddlSubActivity"), "change", ddlMatrix_Change);
+              on(dom.byId("ddlImpParty"), "change", ddlMatrix_Change);
+              on(dom.byId("ddlOffice"), "change", ddlMatrix_Change);
+              on(dom.byId("ddlState"), "change", ddlMatrix_Change);
+              on(dom.byId("ddlManagUnit"), "change", ddlMatrix_Change);
+              on(dom.byId("ddlPopArea"), "change", ddlMatrix_Change);
+              
+
+              var blnShoReportButton = getTokens()['RButton'];
+              if (blnShoReportButton) { document.getElementById("btn_TextSummary").style.display = "inline"; }
+              var blnnoBannter = getTokens()['noBanner'];
+              if (typeof blnnoBannter != 'undefined') {
+
+                  document.getElementById("contact1").style.visibility = "hidden";
+                  document.getElementById("contact2").style.visibility = "hidden";
+                  document.getElementById("theImage2").style.visibility = "hidden";
+                  document.getElementById("theImage3").style.visibility = "hidden";
+                  document.getElementById("theImage4").style.visibility = "hidden";
+                  document.getElementById("panelBasemaps").style.top = "15px";
+                  document.getElementById("mapPanelTitle").style.height = "0px";
+                  document.getElementById("topPane").style.height = "0px";
+                  
+              }
+
+              parser.parse();
+
+              function ddlMatrix_Change(divTagSource) {
+                  var botContainer = registry.byId("bottomTableContainer");
+
+                  if (botContainer.containerNode.style.height == "") {
+                      var bc = registry.byId('content');
+                      var newSize = 150;
+                      dojo.style(botContainer.domNode, "height", 15 + "%");
+                      bc.resize();
+                  }
+
+                  document.getElementById("ImgResultsLoading").style.visibility = "visible";
+                  disableOrEnableFormElements("dropdownForm", 'select-one', true); //disable/enable to avoid user clicking query options during pending queries
+                  disableOrEnableFormElements("dropdownForm", 'button', true);  //disable/enable to avoid user clicking query options during pending queries
+                  $(".divOpenStats").prop("onclick", null).off("click");
+
+
+                  app.map.infoWindow.hide();
+                  app.map.graphics.clear();
+                  CED_PP_point.clearSelection();
+                  CED_PP_line.clearSelection();
+                  CED_PP_poly.clearSelection();
+
+                  document.getElementById("txtQueryResults").innerHTML = "";
+                  var strddlMatrix = document.getElementById("ddlMatrix").options[document.getElementById("ddlMatrix").selectedIndex].value;
+                  var strddlEntry = document.getElementById("ddlEntry").options[document.getElementById("ddlEntry").selectedIndex].value;
+                  var strStartYear = document.getElementById("ddlStartYear").options[document.getElementById("ddlStartYear").selectedIndex].value;
+                  var strActivity = document.getElementById("ddlActivity").options[document.getElementById("ddlActivity").selectedIndex].value;  //get dropdown menu selection
+                  var strSubActivity = document.getElementById("ddlSubActivity").options[document.getElementById("ddlSubActivity").selectedIndex].value;  //get dropdown menu selection
+                  var strImpParty = document.getElementById("ddlImpParty").options[document.getElementById("ddlImpParty").selectedIndex].value;  //get dropdown menu selection
+                  var strOffice = document.getElementById("ddlOffice").options[document.getElementById("ddlOffice").selectedIndex].value;  //get dropdown menu selection
+                  var strState = document.getElementById("ddlState").options[document.getElementById("ddlState").selectedIndex].value;  //get dropdown menu selection
+                  var strPopArea = document.getElementById("ddlPopArea").options[document.getElementById("ddlPopArea").selectedIndex].value;  //get dropdown menu selection
+                  var strManagUnit = document.getElementById("ddlManagUnit").options[document.getElementById("ddlManagUnit").selectedIndex].value;  //get dropdown menu selection
+
+                  if (((strddlMatrix == "All") | (strddlMatrix == "99")) &
+                       (strddlEntry == "99") &
+                       (strStartYear == "99") &
+                       (strActivity == "99") &
+                       (strSubActivity == "99") &
+                       (strImpParty == "99") &
+                       (strOffice == "99") &
+                       (strState == "99") &
+                       (strPopArea == "99") &
+                       (strManagUnit == "99")) {
+                      blnTPKs = true;
+
+                      dojo.forEach(app.arrayLayers, function (player) {
+                          var id = player.id;
+                          if (id == "graphicsLayer1") { player.setVisibility(!blnTPKs); }
+                      });
+                  }
+                  else {
+                      dojo.forEach(app.arrayLayers, function (player) {
+                          var id = player.id;
+                          if (id == "graphicsLayer1") { player.setVisibility(false); }
+                      });
+                  }
+
+                  app.strQueryLabelText = "";
+
+                  var strQuery = "";
+                  if ((app.arrayPrjIDs_fromSpatialSelect != undefined) & (app.arrayPrjIDs_fromSpatialSelect != "")) {
+                      strQuery = "project_ID in (";
+                      for (var i = 0; i < app.arrayPrjIDs_fromSpatialSelect.length; i++) {
+                          strQuery += app.arrayPrjIDs_fromSpatialSelect[i] + ",";
+                      }
+                      strQuery = strQuery.slice(0, -1) + ")";
+                  }
+
+                  if ((strddlMatrix !== "All") & (strddlMatrix !== "99")) {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "typeact = '" + strddlMatrix + "'";
+                      app.strQueryLabelText += "Effort Type = " + document.getElementById("ddlMatrix").options[document.getElementById("ddlMatrix").selectedIndex].text + ", ";
+                  }
+                  if (strddlEntry !== "99") {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "Project_Status = " + strddlEntry + "";
+                      app.strQueryLabelText += "Entry Type = " + document.getElementById("ddlEntry").options[document.getElementById("ddlEntry").selectedIndex].text + ", ";
+                  }
+
+                  if (strStartYear !== "99") {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "Start_Year = " + strStartYear + "";
+                      app.strQueryLabelText += "Start Year = " + document.getElementById("ddlStartYear").options[document.getElementById("ddlStartYear").selectedIndex].text + ", ";
+                  }
+
+                  if (strActivity !== "99") {  //            if ((strActivity !== "All") & (strActivity != 99)) {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "ACT_ID = " + strActivity + "";
+                      app.strQueryLabelText += "Activity Type = " + document.getElementById("ddlActivity").options[document.getElementById("ddlActivity").selectedIndex].text + ", ";
+                  }
+                  if (strSubActivity !== "99") {  //            if ((strActivity !== "All") & (strActivity != 99)) {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "SACT_ID = " + strSubActivity + "";
+                      app.strQueryLabelText += "SubActivity Type = " + document.getElementById("ddlSubActivity").options[document.getElementById("ddlSubActivity").selectedIndex].text + ", ";
+                  }
+                  if (strImpParty !== "99") {    //            if (strImpParty !== "All") {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "IP_ID = " + strImpParty + "";
+                      app.strQueryLabelText += "Implementing Party = " + document.getElementById("ddlImpParty").options[document.getElementById("ddlImpParty").selectedIndex].text + ", ";
+                  }
+                  if (strOffice !== "99") {    //            if (strImpParty !== "All") {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "FO_ID = " + strOffice + "";
+                      app.strQueryLabelText += "Field Office = " + document.getElementById("ddlOffice").options[document.getElementById("ddlOffice").selectedIndex].text + ", ";
+                  }
+                  app.PSQ = new PS_MeasSiteSearch4Definition({
+                      strURL: app.strTheme1_URL, iNonSpatialTableIndex: app.iNonSpatialTableIndex,
+                      strState: strState, strPopArea: strPopArea, strManagUnit: strManagUnit, strQuerySaved: strQuery, divTagSource: divTagSource, pCED_PP_point: CED_PP_point, pCED_PP_poly: CED_PP_poly, pCED_PP_line: CED_PP_line
+                  }); // instantiate the class
+
+                  if ((strState != "99") || (strPopArea != "99") || (strManagUnit != "99")) {
+                      app.PSQ.qry_Non_SpatialTable("", null, "ST_ID");
+
+                      if (strState !== "99") {    //            if (strImpParty !== "All") {
+                          app.strQueryLabelText += "State = " + document.getElementById("ddlState").options[document.getElementById("ddlState").selectedIndex].text + ", ";
+                      }
+                      if (strPopArea !== "99") {    //            if (strImpParty !== "All") {
+                          app.strQueryLabelText += "GRSG Population Area = " + document.getElementById("ddlPopArea").options[document.getElementById("ddlPopArea").selectedIndex].text + ", ";
+                      }
+                      if (strManagUnit !== "99") {    //            if (strImpParty !== "All") {
+                          app.strQueryLabelText += "GRSG Management Zone = " + document.getElementById("ddlManagUnit").options[document.getElementById("ddlManagUnit").selectedIndex].text + ", ";
+                      }
+
+                  } else {  // if not filters realting to related table selected then execute the queries
+                      app.PSQ.ExecutetheDerivedQuery(strQuery, divTagSource);
+                  }
+              }
+
+              function btn_clear_click() {
+                  app.arrayPrjIDs_fromSpatialSelect = "";
+                  document.getElementById("txt_NoSpatial").style.visibility = 'hidden';
+                  disableOrEnableFormElements("dropdownForm", 'select-one', true); //disable/enable to avoid user clicking query options during pending queries
+                  disableOrEnableFormElements("dropdownForm", 'button', true);  //disable/enable to avoid user clicking query options during pending queries
+                  $(".divOpenStats").prop("onclick", null).off("click");
+
+                  document.getElementById("txtQueryResults").innerHTML = "-";
+                  document.getElementById("dTotalProjectsQ").innerHTML = "-";
+                  document.getElementById("dTotalNonProjectsQ").innerHTML = "-";
+                  document.getElementById("dTotalPlansQ").innerHTML = "-";
+                  document.getElementById("dTotalAcresQ").innerHTML = "-";
+
+                  document.getElementById("ImgResultsLoading").style.visibility = "visible";
+                  app.map.infoWindow.hide();
+                  app.map.graphics.clear();
+                  CED_PP_point.clearSelection();
+                  CED_PP_line.clearSelection();
+                  CED_PP_poly.clearSelection();
+
+                  document.getElementById("btn_TextSummary").disabled = true;
+
+                  CED_PP_poly.show();
+                  CED_PP_point.show();
+                  CED_PP_line.show();
+
+                  // do not turn off layer visibility here, the checkbox click methods will handle layer visibility
+                  var pform = dom.byId("toggleForm");
+                  for (var i = 0; i < pform.elements.length; i++) {  //loop through the checkboxes of the form and determin if one of the ones to click
+                      if (pform.elements[i].type == 'checkbox') {
+                          if ((pform.elements[i].name == "checkBoxMZ") || (pform.elements[i].name == "checkBoxPop")) {
+                              //pform.elements[i].checked = false;
+                              if (pform.elements[i].checked == true) {
+                                  pform.elements[i].click();  //turn the layer visiblity on by firing the click event of the checkboxes
+                              }
+                          }
+                          if (!((pform.elements[i].name == "checkBoxMZ") || (pform.elements[i].name == "checkBoxPop"))) {
+                              pform.elements[i].checked = true;
+                              if (pform.elements[i].checked == false) {
+                                  pform.elements[i].click();  //turn the layer visiblity on by firing the click event of the checkboxes
+                              }
+                          }
+                      }
+                  }
+
+                  CED_PP_point.setDefinitionExpression("((SourceFeatureType = 'point') OR ( SourceFeatureType = 'poly' AND Wobbled_GIS = 1)) and (TypeAct not in ('Non-Spatial Plan', 'Non-Spatial Project'))");
+                  //CED_PP_point4FeatureTable.setDefinitionExpression("");
+                  app.pSup.gCED_PP_point4FeatureTable.setDefinitionExpression("");
+                  app.pSup.gFeatureTable.refresh();
+
+                  CED_PP_line.setDefinitionExpression("");
+                  CED_PP_poly.setDefinitionExpression("");
+                  document.getElementById("txtQueryResults").innerHTML = ""; //clear the text results
+
+                  if (document.getElementById("cbx_zoom").checked) {
+                      var customExtentAndSR = new esri.geometry.Extent(-14000000, 4595472, -11000000, 5943351, new esri.SpatialReference({ "wkid": 3857 }));
+                      app.map.setExtent(customExtentAndSR, true);
+                  }
+
+                  app.iNonSpatialTableIndex = 0;  //
+                  app.PS_Uniques.divTagSource = null;
+                  app.PS_Uniques.m_strCED_PP_pointQuery = CED_PP_point.getDefinitionExpression();
+                  app.PS_Uniques.qry_SetUniqueValuesOf("TypeAct", "TypeAct", document.getElementById("ddlMatrix"), "OBJECTID > 0"); //maybe move this to MH_FeatureCount  //clear111
+                  app.strQueryLabelText = "";
+                  app.strQueryLabelTextSpatial = "";
+              }
           },
 
 
           Phase2: function () {
-          app.loading = dojo.byId("loadingImg");  //loading image. id
+              app.loading = dojo.byId("loadingImg");  //loading image. id
+                                      
+              var selectionToolbar;
+
               var customExtentAndSR = new esri.geometry.Extent(-14000000, 4800000, -11000000, 6200000, new esri.SpatialReference({ "wkid": 3857 }));
               app.map = new esri.Map("map", { basemap: "topo", logo: false, extent: customExtentAndSR });
               //app.strTheme1_URL = "https://utility.arcgis.com/usrsvcs/servers/d725bb5ba60348fd841b05f80cf4465d/rest/services/CEDfrontpage_map_v9_Restrict/FeatureServer/"
               app.strTheme1_URL = "https://utility.arcgis.com/usrsvcs/servers/5d5fc053dd7e4de4b9765f7a6b6f1f61/rest/services/CEDfrontpage_map_v9_Restrict/FeatureServer/";
 
+              app.map.on("load", initSelectToolbar);
               dojo.connect(app.map, "onUpdateStart", showLoading);
               dojo.connect(app.map, "onUpdateEnd", hideLoading);
 
               var legendLayers = [];
-              CED_PP_point = new FeatureLayer(app.strTheme1_URL + "0", {id: "0", mode: FeatureLayer.MODE_ONDEMAND, visible: true});
+              CED_PP_point = new FeatureLayer(app.strTheme1_URL + "0", { id: "0", mode: FeatureLayer.MODE_ONDEMAND, outFields: ["Project_ID"], visible: true });
               CED_PP_point.setDefinitionExpression("((SourceFeatureType = 'point') OR ( SourceFeatureType = 'poly' AND Wobbled_GIS = 1)) and (TypeAct not in ('Non-Spatial Plan', 'Non-Spatial Project'))");
               var PSelectionSymbolPoint = new SimpleMarkerSymbol().setColor(new Color([0, 255, 255, 0.4]))
               CED_PP_point.setSelectionSymbol(PSelectionSymbolPoint);
 
               this.gCED_PP_point4FeatureTable = new FeatureLayer(app.strTheme1_URL + "0", {
                   id: "00", mode: FeatureLayer.MODE_ONDEMAND, visible: false,
-                  outFields: ["Project_ID", "SourceFeatureType", "Project_Name", "Project_Status", "Activity", "SubActivity", "Implementing_Party", "Office", "Date_Created", "Last_Updated", "Date_Approved", "TypeAct", "TotalAcres", "TotalMiles"]
-                  //outFields: ["Project_ID", "SourceFeatureType", "Project_Name", "Entry_Type", "Activity", "SubActivity", "Implementing_Party", "Office", "Date_Created", "Last_Updated", "Date_Approved", "TypeAct", "TotalAcres", "TotalMiles"]
+                  outFields: ["Project_ID", "SourceFeatureType", "Project_Name", "Project_Status", "Activity", "SubActivity", "Implementing_Party", "Office", "Date_Created", "Last_Updated", "Date_Approved", "Start_Year", "Finish_Year", "TypeAct", "TotalAcres", "TotalMiles", "Prj_Status_Desc"]
               });
 
-              CED_PP_line = new FeatureLayer(app.strTheme1_URL + "1", { id: "1", mode: FeatureLayer.MODE_ONDEMAND, visible: true });
+              CED_PP_line = new FeatureLayer(app.strTheme1_URL + "1", { id: "1", mode: FeatureLayer.MODE_ONDEMAND, outFields: ["Project_ID"], visible: true });
               pSeletionSymbolLine = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([0, 255, 255]), 3)
               CED_PP_line.setSelectionSymbol(pSeletionSymbolLine);
 
-              CED_PP_poly = new FeatureLayer(app.strTheme1_URL + "2", { id: "2", "opacity": 0.5, mode: esri.layers.FeatureLayer.MODE_ONDEMAND, autoGeneralize: true, visible: true });
-              pSeletionSymbolPoly = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([0, 0, 0]), 3), new Color([0, 255, 255, 0.4]));
+              CED_PP_poly = new FeatureLayer(app.strTheme1_URL + "2", { id: "2", "opacity": 0.5, mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["Project_ID"], autoGeneralize: true, visible: true });
+              pSeletionSymbolPoly = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2), new Color([0, 255, 255, 0.4]));
               CED_PP_poly.setSelectionSymbol(pSeletionSymbolPoly);
-
 
               var strBase_URL = "https://services.arcgis.com/QVENGdaPbd4LUkLV/arcgis/rest/services/CED_Base_Layers/FeatureServer/"
               var strlabelField1 = "POPULATION";
@@ -140,14 +484,14 @@ define([
               var vGreyColor = new Color("#666");              // create a text symbol to define the style of labels
               var pLabel1 = new TextSymbol().setColor(vGreyColor);
               pLabel1.font.setSize("10pt");
-              pLabel1.font.setFamily("arial");
+              pLabel1.font.setFamily("helvetica");
               var pLabelRenderer1 = new SimpleRenderer(pLabel1);
               var plabels1 = new LabelLayer({ id: "labels1" });
               plabels1.addFeatureLayer(pBase_Pop, pLabelRenderer1, "{" + strlabelField1 + "}");
 
               var pLabel2 = new TextSymbol().setColor(vGreyColor);
               pLabel2.font.setSize("10pt");
-              pLabel2.font.setFamily("Arial Black");
+              pLabel2.font.setFamily("helvetica Black");
               var pLabelRenderer2 = new SimpleRenderer(pLabel2);
               var plabels2 = new LabelLayer({ id: "labels2" });
               plabels2.addFeatureLayer(pBase_MZ, pLabelRenderer2, "{" + strlabelField2 + "} : {" + strlabelField3 + "}");
@@ -162,8 +506,6 @@ define([
               legendLayers.push({ layer: pBase_Breed, title: 'Breeding Habitat Distribution (Doherty et al. 2017)' });
               legendLayers.push({ layer: pBase_PI, title: 'GRSG Pop’l’n Index (Relative Abundance) (Doherty et al. 2017)' });
               legendLayers.push({ layer: CED_PP_poly, title: 'CED Plans and Projects' });
-              //legendLayers.push({ layer: CED_PP_line, title: 'CED Plans and Projects (line)' });
-              //legendLayers.push({ layer: CED_PP_point, title: 'CED Plans and Projects (point)' });
               legendLayers.push({ layer: pBase_Pop, title: 'GRSG Populations' });
               legendLayers.push({ layer: pBase_MZ, title: 'WAFWA Management Zones' });
 
@@ -247,12 +589,13 @@ define([
               this.gFeatureTable = new FeatureTable({
                   "featureLayer": this.gCED_PP_point4FeatureTable,
                   "outFields": [
-                    "Project_ID", "TypeAct", "Project_Name", "Activity", "SubActivity", "Implementing_Party", "Office", "Date_Created",
-                    "Last_Updated", "Date_Approved", "TotalAcres", "TotalMiles", "SourceFeatureType"
+                    "Project_ID", "TypeAct", "Prj_Status_Desc", "Project_Name", "Activity", "SubActivity", "Implementing_Party", "Office", "Date_Created",
+                    "Last_Updated", "Date_Approved", "Start_Year", "Finish_Year", "TotalAcres", "TotalMiles", "SourceFeatureType"
                   ],
                   fieldInfos: [
                     { name: 'Project_ID', alias: 'ID'},
                     { name: 'TypeAct', alias: 'Project or Plan', },
+                    { name: 'Prj_Status_Desc', alias: 'Implementation Status', },
                     { name: 'Project_Name', alias: 'Effort Name', },
                     { name: 'Activity', alias: 'Activity', },
                     { name: 'SubActivity', alias: 'Sub Activity', },
@@ -261,6 +604,8 @@ define([
                     { name: 'Date_Created', alias: 'Date Recorded', },
                     { name: 'Last_Updated', alias: 'Recorded Update', },
                     { name: 'Date_Approved', alias: 'Date Approved', },
+                    { name: 'Start_Year', alias: 'Start Year', },
+                    { name: 'Finish_Year', alias: 'Finish Year', },
                     { name: 'TotalAcres', alias: 'Acres', },
                     { name: 'TotalMiles', alias: 'Miles', },
                     { name: 'SourceFeatureType', alias: 'Source', }
@@ -272,9 +617,127 @@ define([
               this.gFeatureTable.columnResizer = false;
               this.gFeatureTable.startup();
 
+              function handleSpatialSelectResults(results) {
+                  var featureLayer1Message = results[0].features.length;
+                  var featureLayer2Message = results[1].features.length;
+                  var featureLayer3Message = results[2].features.length;
+
+                  var count = 0;
+                  for (var i = 0; i < results.length; i++) {
+                      count = count + results[i].features.length;
+                  }
+                  var temp = "Total features selected:  <b>" + count + "</b><br>&nbsp;&nbsp;FeatureLayer1:  <b>" + featureLayer1Message + "</b><br>&nbsp;&nbsp;FeatureLayer2:  <b>" + featureLayer2Message + "</b><br>&nbsp;&nbsp;FeatureLayer3:  " + featureLayer3Message;
+
+                  var items = arrayUtils.map(results, function (result) {
+                      return result;
+                  });
+
+                  var allItems = [];
+
+                  arrayUtils.map(items[0].features, function (item) {
+                      allItems.push(item.attributes.Project_ID);
+                  })
+
+                  arrayUtils.map(items[1].features, function (item) {
+                      allItems.push(item.attributes.Project_ID);
+                  })
+
+                  arrayUtils.map(items[2].features, function (item) {
+                      allItems.push(item.attributes.Project_ID);
+                  })
+
+                  if (allItems.length > 0) {
+                      app.arrayPrjIDs_fromSpatialSelect = allItems;
+                      var strQuery2 = "";
+                      strQuery2 = "project_ID in (";
+                      for (var i = 0; i < app.arrayPrjIDs_fromSpatialSelect.length; i++) {
+                          strQuery2 += app.arrayPrjIDs_fromSpatialSelect[i] + ",";
+                      }
+                      strQuery2 = strQuery2.slice(0, -1) + ")";
+                      this.strFinalQuery += strQuery2;
+                      
+                      if (app.PSQ == null) {
+                          app.PSQ = new PS_MeasSiteSearch4Definition({
+                              strURL: app.strTheme1_URL, iNonSpatialTableIndex: app.iNonSpatialTableIndex,
+                              strState: "", strPopArea: "", strManagUnit: "", strQuerySaved: strQuery2, divTagSource: document.getElementById("ddlMatrix"),
+                              pCED_PP_point: CED_PP_point, pCED_PP_poly: CED_PP_poly, pCED_PP_line: CED_PP_line
+                          }); 
+                      }
+
+                      app.PSQ.ExecutetheDerivedQuery(strQuery2, null);
+                  }
+              }
+
+              function initSelectToolbar(event) {
+                  selectionToolbar = new Draw(event.map);
+                  var selectQuery = new Query();
+
+                  on(selectionToolbar, "DrawEnd", function (pGeometry) {
+                      if (app.strQueryLabelTextSpatial == undefined) {
+                          app.strQueryLabelTextSpatial = "";
+                      }
+                      app.strQueryLabelTextSpatial = "</br>Spatial Selection (xmin=" + Math.round(pGeometry.xmin / 100000).toString() +
+                                                                        ",ymin=" + Math.round(pGeometry.ymin / 100000).toString() +
+                                                                        ",xmax=" + Math.round(pGeometry.xmax / 100000).toString() +
+                                                                        ",ymax=" + Math.round(pGeometry.ymax / 100000).toString() + ")";
+                      app.FilterGeometry = pGeometry;
+                      selectionToolbar.deactivate();
+
+                      switch (pGeometry.type) {
+                          case "point":
+                          case "multipoint":
+                              symbol = new SimpleMarkerSymbol();
+                              break;
+                          case "polyline":
+                              symbol = new SimpleLineSymbol();
+                              break;
+                          default:
+                              symbol = new SimpleFillSymbol();
+                              break;
+                      }
+                      var graphic = new Graphic(pGeometry, symbol);
+                      app.map.graphics.add(graphic);
+                      SpatialqueryMapService(pGeometry);
+                  });
+              }
+
+              function SpatialqueryMapService(Geom) {
+                  qt_Layer1 = new esri.tasks.QueryTask(CED_PP_point.url);
+                  q_Layer1 = new esri.tasks.Query();
+                  qt_Layer2 = new esri.tasks.QueryTask(CED_PP_line.url);
+                  q_Layer2 = new esri.tasks.Query();
+                  qt_Layer3 = new esri.tasks.QueryTask(CED_PP_poly.url);
+                  q_Layer3 = new esri.tasks.Query();
+                  q_Layer1.returnGeometry = q_Layer2.returnGeometry = q_Layer3.returnGeometry = false;
+                  q_Layer1.outFields = q_Layer2.outFields = q_Layer3.outFields = ["Project_ID"];
+                  q_Layer1.geometry = q_Layer2.geometry = q_Layer3.geometry = Geom;
+
+                  q_Layer1.where = CED_PP_point.getDefinitionExpression();
+                  q_Layer2.where = CED_PP_line.getDefinitionExpression();
+                  q_Layer3.where = CED_PP_poly.getDefinitionExpression();
+
+                  var pLayer1, pLayer2, pLayer3, pPromises;
+                  pLayer1 = qt_Layer1.execute(q_Layer1);
+                  pLayer2 = qt_Layer2.execute(q_Layer2);
+                  pLayer3 = qt_Layer3.execute(q_Layer3);
+                  pPromises = new All([pLayer1, pLayer2, pLayer3]);
+                  pPromises.then(handleSpatialSelectResults, this.err);
+
+                  var botContainer = registry.byId("bottomTableContainer");//open the attribute table if not already done so
+                  if (botContainer.containerNode.style.height == "") {
+                      var bc = registry.byId('content');
+                      var newSize = 150;
+                      dojo.style(botContainer.domNode, "height", 15 + "%");
+                      bc.resize();
+                  }
+              }
+
+              on(dom.byId("btn_selectFieldsButton"), "click", function () {
+                  selectionToolbar.activate(Draw.EXTENT);
+              });
               on(this.gFeatureTable, "load", function (evt) {  //resize the column widths
                   var pGrid = this.grid;
-                  var arrayColWidths = [55, 145, 380, 380, 360, 230, 290, 150, 150, 150, 80, 80, 60];
+                  var arrayColWidths = [55, 145, 145, 380, 380, 360, 230, 290, 150, 150, 150, 80, 80, 60, 100, 100];
                   var iTotalWidth = 0;
                   dojo.forEach(arrayColWidths, function (iWidth) {
                       iTotalWidth += iWidth;
@@ -288,9 +751,7 @@ define([
                   });
                   pGrid.bodyNode.scrollWidth = iTotalWidth;
               });
-
-
-
+              
               on(this.gFeatureTable, "row-select", function (evt) {  //resize the column widths
                   app.map.graphics.clear();
                   CED_PP_point.clearSelection();
@@ -307,7 +768,6 @@ define([
 
                       strProjectType = pRow.data.TypeAct;
                       if (strProjectType == "Spatial Project") {
-                          //strSourceGeom = pRow.data.SourceFeatureType;
                           iProjectid = pRow.data.Project_ID;
                           arrayPrjIDs.push(iProjectid);
                       }
@@ -338,7 +798,6 @@ define([
                       allPromises.then(function (r) {
                           showResults(r);
                       });
-
 
                       function showResults(results) {
                           var pUnionedExtent;
@@ -378,21 +837,26 @@ define([
                                   pUnionedExtent = graphicsUtils.graphicsExtent(CED_PP_line.getSelectedFeatures());
                               }
                           }
-
-                          app.map.setExtent(pUnionedExtent, true);
+                          if (document.getElementById("cbx_zoom").checked) {
+                            app.map.setExtent(pUnionedExtent, true);
+                          }
+                          
                       };
                   }
                   else {
                       alert("Effort selected is a non-spatial record, select a spatial record for map highlighting");
                   }
               });
-
-
-
+              
               return arrayLayers;
           },
 
+          
           Phase3: function (CED_PP_point, CED_PP_line, CED_PP_poly) {
+              app.pSetQS = new PS_MeasSiteSearch_SetVisableQueryDef({ pCED_PP_point: CED_PP_point, pCED_PP_poly: CED_PP_poly, pCED_PP_line: CED_PP_line }); // instantiate the class
+
+              dojo.connect(app.map, "onClick", executeIdeintifyQueries);
+
               var scalebar = new Scalebar({ map: app.map, scalebarUnit: "dual" });
               var pGeocoder = new Geocoder({ autoComplete: true, arcgisGeocoder: { placeholder: "Find a place" }, map: app.map }, dojo.byId('search'));
               pGeocoder.startup();
@@ -415,18 +879,13 @@ define([
                       if (!(isNaN(request.term))) {
                           strURL4Search = app.strTheme1_URL + "0/query" +
                                        "?where=Project_Name+like+%27%25" + request.term + "%25%27+or+Project_ID+%3D+" + request.term + "&f=pjson&returnGeometry=true&outFields=Project_Name%2C+Project_ID%2C+SourceFeatureType%2C+TypeAct";
-                          //strURL4Search = app.strTheme1_URL + "0/query" +
-                          //             "?where=Project_Name+like+%27%25" + request.term + "%25%27+or+Project_ID+%3D+" + request.term + "&f=pjson&outFields=*&returnGeometry=true&outFields=Project_Name%2C+Project_ID%2C+SourceFeatureType%2C+TypeAct%2C+geometry";
 
                       } else {
                           strURL4Search = app.strTheme1_URL + "0/query" +
                                        "?where=Project_Name+like+'%25" + request.term + "%25'" + "&f=pjson&returnGeometry=true&outFields=Project_Name%2C+Project_ID%2C+SourceFeatureType%2C+TypeAct";
-                          //strURL4Search = app.strTheme1_URL + "0/query" +
-                          //             "?where=Project_Name+like+'%25" + request.term + "%25'" + "&f=pjson&outFields=*&returnGeometry=true&outFields=Project_Name%2C+Project_ID%2C+SourceFeatureType%2C+TypeAct%2C+geometry";
 
                       }
                       $.ajax({
-                          //url: app.strTheme1_URL + "find" + "?searchFields=Project_Name,Project_ID&SearchText=" + request.term + "&layers=0&f=pjson&returnGeometry=true",
                           url: strURL4Search,
                           dataType: "jsonp",
                           data: {},                        //data: { where: strSearchField + " LIKE '%" + request.term.replace(/\'/g, '\'\'').toUpperCase() + "%'", outFields: strSearchField, returnGeometry: true, f: "pjson" },                        
@@ -459,7 +918,6 @@ define([
                       var dblX = pGeometryPoint[0];
                       var dblY = pGeometryPoint[1];
                       var strValue3 = ui.item.value3;
-                      //var psqs_strQueryString = "objectid  > 0";
                       app.map.infoWindow.hide();            //var strquery4id = "Contaminant LIKE '%Mercury%'";
                       app.map.graphics.clear();
                       CED_PP_point.clearSelection();
@@ -469,21 +927,191 @@ define([
                       app.pPS_Identify = new PS_Identify({ pLayer1: CED_PP_point, pLayer2: CED_PP_line, pLayer3: CED_PP_poly, pMap: app.map,
                           strQueryString4Measurements: "Project_ID = " + strValue3, strURL: app.strTheme1_URL, pInfoWindow: app.infoWindow, mSR: pSR
                       }); // instantiate the ID Search class    
-
-                      //app.pPS_Identify = new PS_Identify({
-                      //    pLayer1: CED_PP_point, pLayer2: CED_PP_line, pLayer3: CED_PP_poly, pMap: app.map,
-                      //    strQueryString4Measurements: "OBJECTID > 0", strURL: app.strTheme1_URL, pInfoWindow: app.infoWindow, mSR: pSR
-                      //}); // instantiate the ID Search class    
-
                       var pPS_Identify_Results = app.pPS_Identify.executeQueries(null, "", 0, pGeometryPoint[0], pGeometryPoint[1]);
                   }
               });
+              
+              app.iNonSpatialTableIndex = 0;  //these 3 lines populate the list values
+              app.PS_Uniques = new PS_PopUniqueQueryInterfaceValues({ strURL: app.strTheme1_URL, iNonSpatialTableIndex: 0, divTagSource: null });
+              app.PS_Uniques.m_strCED_PP_pointQuery = CED_PP_point.getDefinitionExpression();
+              app.PS_Uniques.qry_SetUniqueValuesOf("TypeAct", "TypeAct", document.getElementById("ddlMatrix"), "OBJECTID > 0"); //startup
+
+              if (app.map.loaded) {
+                  mapLoaded();
+              } else {
+                  app.map.on("load", function () { mapLoaded(); });
+              }
+
+              app.pFC = new MH_FeatureCount({}); // instantiate the zoom class
+
+              function mapLoaded() {        // map loaded//            // Map is ready
+                  app.map.on("mouse-move", showCoordinates); //after map loads, connect to listen to mouse move & drag events
+                  app.map.on("mouse-drag", showCoordinates);
+                  app.basemapGallery = new BasemapGallery({ showArcGISBasemaps: true, map: app.map }, "basemapGallery");
+                  app.basemapGallery.startup();
+                  app.basemapGallery.on("selection-change", function () { domClass.remove("panelBasemaps", "panelBasemapsOn"); });
+                  app.basemapGallery.on("error", function (msg) { console.log("basemap gallery error:  ", msg); });
+              }
+
+              function showCoordinates(evt) {
+                  var mp = webMercatorUtils.webMercatorToGeographic(evt.mapPoint);  //the map is in web mercator but display coordinates in geographic (lat, long)
+                  dom.byId("txt_xyCoords").innerHTML = "Latitude:" + mp.y.toFixed(4) + ", Longitude:" + mp.x.toFixed(4);  //display mouse coordinates
+              }
+
+              function executeIdeintifyQueries(e) {
+                  app.map.graphics.clear();
+
+                  CED_PP_point.clearSelection();
+                  CED_PP_line.clearSelection();
+                  CED_PP_poly.clearSelection();
+
+                  var strMatrix = document.getElementById("ddlMatrix").options[document.getElementById("ddlMatrix").selectedIndex].text;  //get dropdown menu selection
+                  var strManagUnit = document.getElementById("ddlManagUnit").options[document.getElementById("ddlManagUnit").selectedIndex].value;  //get dropdown menu selection
+                  app.PSQS = new PS_ReturnQuerySt({ strURL: app.strTheme1_URL, strMatrix: strMatrix, strManagUnit: strManagUnit, SIDs: null, iNonSpatialTableIndex: null }); // instantiate the Seat Geek Search class
+                  var psqs_strQueryString = app.PSQS.returnQS();
+
+                  app.map.infoWindow.hide();            //var strquery4id = "Contaminant LIKE '%Mercury%'";
+                  app.pPS_Identify = new PS_Identify({
+                      pLayer1: CED_PP_point, pLayer2: CED_PP_line, pLayer3: CED_PP_poly, pMap: app.map,
+                      strQueryString4Measurements: psqs_strQueryString, strURL: app.strTheme1_URL,
+                      pInfoWindow: app.infoWindow
+                  }); // instantiate the ID Search class
+                  app.pEvt = e;
+                  var pPS_Identify_Results = app.pPS_Identify.executeQueries(e, "", 0, 0, 0);
+              }
 
 
           },
 
+          Phase4: function () {
+
+              var strA_TypeAct = getTokens()['TA'];
+              var strA_entry_type = getTokens()['ET'];
+              var strA_activity = getTokens()['ACT'];
+              var strA_Subactivity = getTokens()['SACT'];
+              var strA_implementing_party = getTokens()['IP'];
+              var strA_office = getTokens()['FO'];
+              var strA_State = getTokens()['ST'];
+              var strA_POPArea = getTokens()['POP'];
+              var strA_Managementunit = getTokens()['MU'];
+
+              parser.parse();
+              //https://conservationefforts.org/grsgmap/?IP=11,14,16&TA=3&ST=183,985,1992,4512,9901,12665,15561,19432
+              if ((strA_TypeAct) || (strA_entry_type) || (strA_activity) || (strA_Subactivity) || (strA_implementing_party) || (strA_State) || (strA_POPArea) || (strA_Managementunit || strA_office)) {
+                  var botContainer = registry.byId("bottomTableContainer");
+
+                  if (botContainer.containerNode.style.height == "") {
+                      var bc = registry.byId('content');
+                      var newSize = 150;
+                      dojo.style(botContainer.domNode, "height", 15 + "%");
+                      bc.resize();
+                  }
+
+                  RunQueryArgs(strA_TypeAct, strA_entry_type, strA_activity, strA_Subactivity, strA_implementing_party, strA_State, strA_POPArea, strA_Managementunit, strA_office);
+              } else {
+                  document.getElementById("btn_TextSummary").disabled = true;
+              }
+
+
+
+              function RunQueryArgs(strA_TypeAct, strA_entry_type, strA_activity, strA_Subactivity, strA_implementing_party, strA_State, strA_POPArea, strA_Managementunit, strA_office) {
+                  dojo.forEach(app.arrayLayers, function (player) {
+                      var id = player.id;
+                      if ((id == "0") | (id == "1") | (id == "2") | (id == "graphicsLayer1")) {
+                          player.setDefinitionExpression("OBJECTID < 0");  // set the definition expression for quick display of nothing
+                          player.setVisibility(true);
+                      }
+                  });
+
+                  var strQuery = ""
+                  if (strA_TypeAct) {
+                      strQuery = "(ta_id in (" + strA_TypeAct + "))";
+                  }
+                  if (strA_entry_type) {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "(Project_Status in (" + strA_entry_type + "))";
+                  }
+                  if (strA_activity) {  //            if ((strActivity !== "All") & (strActivity != 99)) {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "(ACT_ID in (" + strA_activity + "))";
+                  }
+                  if (strA_Subactivity) {  //            if ((strActivity !== "All") & (strActivity != 99)) {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "(SACT_ID in (" + strA_Subactivity + "))";
+                  }
+                  if (strA_implementing_party) {    //            if (strImpParty !== "All") {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "(IP_ID in (" + strA_implementing_party + "))";
+                  }
+                  if (strA_office) {    //            if (strImpParty !== "All") {
+                      if (strQuery !== "") { strQuery += " and "; }
+                      strQuery += "(FO_ID in (" + strA_office + "))";
+                  }
+
+                  app.PSQ = new PS_MeasSiteSearch4Definition({
+                      strURL: app.strTheme1_URL, iNonSpatialTableIndex: app.iNonSpatialTableIndex,
+                      strState: strA_State, strPopArea: strA_POPArea, strManagUnit: strA_Managementunit, strQuerySaved: strQuery, divTagSource: document.getElementById("ddlMatrix"),
+                      pCED_PP_point: CED_PP_point, pCED_PP_poly: CED_PP_poly, pCED_PP_line: CED_PP_line
+                  }); // instantiate the class
+
+                  if ((strA_State != undefined) || (strA_POPArea != undefined) || (strA_Managementunit != undefined)) {
+                      var PSQResults = app.PSQ.qry_Non_SpatialTable("", null, "ST_ID");
+                      PSQResults.then(PSQsearchSucceeded, PSQsearchFailed);
+                  } else {  // handling arguments passed
+                      app.PSQ.ExecutetheDerivedQuery(strQuery, document.getElementById("ddlMatrix"));
+                  }
+                  app.PS_Uniques.m_strCED_PP_pointQuery = CED_PP_point.getDefinitionExpression();
+                  app.PS_Uniques.divTagSource = null;
+                  app.PS_Uniques.qry_SetUniqueValuesOf("TypeAct", "TypeAct", document.getElementById("ddlMatrix"), CED_PP_point.getDefinitionExpression()); //args
+
+              }
+
+              function PSQsearchSucceeded(results) { }
+
+              function PSStatFailed(err) { document.getElementById("txtQueryResults").innerHTML = " Search error " + err.toString(); }
+
+              function PSQsearchFailed(err) { document.getElementById("txtQueryResults").innerHTML = " Search error " + err.toString(); }
+          },
+
+
+          openCEDPSummary: function () {
+              localStorage.setItem("ls_strTheme1_URL", app.strTheme1_URL);
+              localStorage.setItem("ls_strDefQuery", CED_PP_point.getDefinitionExpression());
+              localStorage.setItem("ls_strDefQuery2", app.PS_Uniques.strQuery1);
+              localStorage.setItem("ls_strQueryLabelText", app.strQueryLabelText);
+              localStorage.setItem("ls_strQueryLabelTextSpatial", app.strQueryLabelTextSpatial);
+
+              localStorage.setItem("ls_strMapExtent", String(app.map.extent.xmin + "," + app.map.extent.ymin + "," + app.map.extent.xmax + "," + app.map.extent.ymax));
+
+              strBasemap = "topo";
+              if (app.basemapGallery._selectedBasemap != null) {
+                  pBasemap = app.basemapGallery.getSelected();
+                  strBasemap = pBasemap.id;
+              }
+
+              localStorage.setItem("ls_strBasemap", strBasemap);
+
+              var array_extraMaplayerList = [];
+              dojo.forEach(app.map.graphicsLayerIds, function (pGraphicLayerID) {
+                  pTempGraphicLayer = app.map.getLayer(pGraphicLayerID);
+                  if ((pTempGraphicLayer.visible) &
+                      (pGraphicLayerID != "labels1") & (pGraphicLayerID != "labels2")) {
+                      array_extraMaplayerList.push(pGraphicLayerID);
+                  }
+              });
+
+              var str_extraMaplayerList = String(array_extraMaplayerList);
+              localStorage.setItem("ls_extraMaplayerList", str_extraMaplayerList);
+
+              var pNewWindow = window.open("CEDPSummary.html");
+          },
+
+
           err: function (err) {
               console.log("Failed to get stat results due to an error: ", err);
+              $(function () {
+                  $("#dialogWarning1").dialog("open");
+              });
           }
       }
     )
@@ -491,4 +1119,5 @@ define([
 
   }
 );
+
 

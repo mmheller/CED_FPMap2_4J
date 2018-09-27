@@ -15,12 +15,6 @@ define([
         return str.replace('     ', ' ').replace('    ', ' ').replace('  ', ' ');
     }
 
-//    function CreateLayerDefString(values) {
-//        var strDefQuery2 = "Project_ID in (" + values + ")";
-//        strDefQuery2 = trimStringWhiteSpace(String(strDefQuery2));
-//        return strDefQuery2;
-//    }
-
     return declare([], {
         strURL: null,
         iNonSpatialTableIndex: null,
@@ -68,7 +62,7 @@ define([
                 else {
                     this.iNonSpatialTableIndex = 6;  //set the index for the next table to query
                     strField4NextQuery = "Pop_ID";
-                    //this.qry_Non_SpatialTable(strQuery1, arrayIDTemp, "Pop_ID");
+
                 }
             }
             if (this.strField == "Pop_ID"){
@@ -80,7 +74,7 @@ define([
                 else {
                     this.iNonSpatialTableIndex = 3; //set the index for the next table to query
                     strField4NextQuery = "WAFWA_ID";
-                    //this.qry_Non_SpatialTable(strQuery1, arrayIDTemp, "WAFWA_ID");
+
                 }
             }
             if (this.strField == "WAFWA_ID") {
@@ -98,9 +92,9 @@ define([
                 pQuery.returnGeometry = false;
                 pQuery.outFields = ["Project_id"];
                 pQuery.where = strQuery;
-                //this.strQuerySaved = strQuery
+
                 pQueryT.execute(pQuery, this.returnEvents, this.err);
-                //return pQueryT.execute(pQuery, this.returnEvents, this.err);
+
             } else {
                 this.qry_Non_SpatialTable(strQuery1, arrayIDTemp, strField4NextQuery);
             }
@@ -117,20 +111,12 @@ define([
             document.getElementById("dTotalPlansQ").innerHTML = "-";
             document.getElementById("dTotalAcresQ").innerHTML = "-";
 
-            //this.PopulateUniqueQueryInterfaceValues(strQuery, divTagSource);
-            if (strQuery == "") { strQuery = "objectid > 0"; }
+            if (strQuery == "") { strQuery = "OBJECTID > 0"; }
             app.iNonSpatialTableIndex = 0;  //
-            //app.PS_Uniques = new PS_PopUniqueQueryInterfaceValues({ strURL: app.strTheme1_URL, iNonSpatialTableIndex: 0, strQuery1: strQuery, divTagSource: divTagSource }); // instantiate the  class
 
-            //if (divTagSource == undefined) {
-            //    divTagSource = null;
-            //}
-
-            app.PS_Uniques.divTagSource = divTagSource;
-            //Debug.writeln("qry_SetUniqueValuesOf at dropdown change");
+            app.PS_Uniques.divTagSource = divTagSource;    //this may be redundant
             app.PS_Uniques.qry_SetUniqueValuesOf("TypeAct", "TypeAct", document.getElementById("ddlMatrix"), strQuery);//dropdown change
 
-            //app.pSetQS = new PS_MeasSiteSearch_SetVisableQueryDef({ pCED_PP_point: this.pCED_PP_point, pCED_PP_poly: this.pCED_PP_poly, pCED_PP_line: this.pCED_PP_line }); // instantiate the class
             var blnQSSet = app.pSetQS.setQS(strQuery);
 
             if (document.getElementById("cbx_zoom").checked) {
@@ -149,7 +135,6 @@ define([
                     var testVals = {};
                     var features = results.features; //Loop through the QueryTask results and populate an array with the unique values
                     dojo.forEach(features, function (feature) {
-                        //zone = feature.attributes.project_id;
                         zone = feature.attributes.Project_ID;
                         if (!testVals[zone]) {
                             testVals[zone] = true;
@@ -181,7 +166,6 @@ define([
                         blnFireReturnEvents = true;
                     } else {
                         this.iNonSpatialTableIndex = 8;
-                        //strQuery = this.strField + " = '" + this.strPopArea + "'";
                         this.qry_Non_SpatialTable(strQuery2, "", "Pop_ID");
                     }
                     break;
@@ -191,7 +175,6 @@ define([
                         blnFireReturnEvents = true;
                     } else {
                         this.iNonSpatialTableIndex = 3;
-                        //strQuery = this.strField + " = '" + this.strManagUnit + "'";
                         this.qry_Non_SpatialTable(strQuery2, "", "WAFWA_ID");
                     }
                     break;
@@ -209,16 +192,14 @@ define([
                     if (this.strQuerySaved == null) { this.strQuerySaved = ""; }
                     this.strFinalQuery = this.strQuerySaved;
                 }
-
-                console.log("this.divTagSource" + (this.divTagSource == undefined));
-                //Debug.writeln("firing !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + this.strField + this.strFinalQuery);
                 this.ExecutetheDerivedQuery(this.strFinalQuery, this.divTagSource);
- 
             }
         },
         err: function (err) {
             console.log("Failed to get results due to an error: ", err);
-            alert(error.name);
+            $(function () {
+                $("#dialogWarning1").dialog("open");
+            });
         }
     }
     )

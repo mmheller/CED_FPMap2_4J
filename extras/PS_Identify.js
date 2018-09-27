@@ -99,13 +99,10 @@ define([
                 this.mSR = new esri.SpatialReference({ "wkid": 3857 });
                 var pSP = app.map.toScreen(pMP);
                 padding = 500
-                //padding = 0.0005
+                
                 this.m_dblX = dblX
                 this.m_dblY = dblY
-                //strQuery1 = "((SourceFeatureType = 'point') OR ( SourceFeatureType = 'poly' AND Wobbled_GIS = 1))"
-                //strQuery1 = "(((SourceFeatureType = 'point') OR ( SourceFeatureType = 'poly' AND Wobbled_GIS = 1)) and (TypeAct not in ('Non-Spatial Plan', 'Non-Spatial Project')))"
-                //strQuery23 = "OBJECTID > 0";
-
+                
                 strQuery1 = this.strQueryString4Measurements;
                 strQuery23 = this.strQueryString4Measurements;
             }
@@ -180,7 +177,6 @@ define([
 
                 if (strStat_Type == "nostat") {  // code handles features and displaying features in the identify window
                     tab3Content = "<i>Total features returned: " + resultFeatures.length + "</i>";
-                    //if (resultFeatures.length > 999) { tab3Content += "<i> (Note: Maximum Number of Records Returned is 1,000)</i>"; }
                     var strFieldNamesStrings = "";
 
                     strFieldNamesStrings = ["threats"];
@@ -213,7 +209,7 @@ define([
                         this.app.pPS_Identify.strFeatureContent += "<br />      exceeding count = " + iStatValue; //this.app.pPS_Identify.strFeatureContent += "<br />      " + strStat_Type + " = " + iStatValue + " " + strOnStatisticField;
                     }
                     else {
-                        //this.app.pPS_Identify.strFeatureContent += strStat_Type + " = " + iStatValue + "<br /><br />      "; //this.app.pPS_Identify.strFeatureContent += "<br />      " + strStat_Type + " = " + iStatValue + " " + strOnStatisticField;
+                        //do nothing
                     }
                 }
 
@@ -227,7 +223,7 @@ define([
                 if ((this.m_ExceedCount > -1) && (this.m_ExceedSum > -1)) {
                     var c = dojo.create("div", { id: "ExceedChart" }, dojo.create('div')); //create the chart that will display in the second tab
                     var chart = new dojox.charting.Chart2D(c, { title: "Note: values depend on user search/query filter",
-                        titlePos: "bottom", titleGap: 30, titleFont: "normal normal normal 8pt Arial", titleFontColor: "grey"
+                        titlePos: "bottom", titleGap: 30, titleFont: "normal normal normal 8pt helvetica", titleFontColor: "grey"
                     });
                     dojo.addClass(chart, 'chart');
                     chart.setTheme(dojo.getObject("dojox.charting.themes.Julie")); //try other themes (Julie,CubanShirts, PrimaryColors, Charged, BlueDusk, Bahamation,Harmony,Shrooms,Wetland)   
@@ -252,12 +248,10 @@ define([
                     new dojox.charting.action2d.Highlight(chart, "default"); //highlight the chart and display tooltips when you mouse over a slice.   
                     new dojox.charting.action2d.Tooltip(chart, "default");
                     new dojox.charting.action2d.MoveSlice(chart, "default");
-                    //                    this.app.mCp2.set('content', chart.node);
                 }
 
                 this.app.map.infoWindow.setContent("");
                 this.app.map.infoWindow.setContent(this.app.mTc.domNode);
-                //this.app.mTc.resize({ w: 550, h: 300 });
                 this.app.mTc.resize({ w: 460, h: 235 });
 
                 switch (strConcat) {                //                'count' | 'sum' | 'min' | 'max' | 'avg' | 'stddev'
@@ -268,7 +262,6 @@ define([
             }
             else {                // do nothing
             }
-            //            return results;
         },
 
         showFeature: function (pFeature, strTheme) {
@@ -285,7 +278,9 @@ define([
             else if (strTheme == "Line") {
                 pFeature.setSymbol(new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([0, 255, 255]), 3));
             }
-            else { pFeature.setSymbol(new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([0, 0, 0]), 3), new Color([0, 255, 255, 0.4]))); }
+            else {
+                pFeature.setSymbol(new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2), new Color([0, 255, 255, 0.4])));
+            }
 
 
             var strGISTotalAcres = "n/a";
@@ -398,7 +393,6 @@ define([
             pLayer1 = results[0].features; // results from deferred lists are returned in the order they were created  // so parcel results are first in the array and buildings results are second
             pLayer2 = results[1].features;
             pLayer3 = results[2].features;
-            //this.pMap.graphics.clear();
 
             var content = "<u>Number of point projects/plans:  " + pLayer1.length + "</u><br />";
             arrayUtils.forEach(pLayer1, function (feat) { feat.setSymbol(new SimpleMarkerSymbol().setColor(new Color([0, 255, 255, 0.4]))); app.map.graphics.add(feat); }); // add the results to the map
@@ -429,8 +423,6 @@ define([
             this.pMap.infoWindow.setTitle("Identify Results");
             this.pMap.infoWindow.resize(400, 300);
             this.pMap.infoWindow.show(this.pSP, this.pMap.getInfoWindowAnchor(this.pSP));
-            
-            //this.mTc.resize({ w: 460, h: 235 });
         },
 
         returnEvents: function (results) {
@@ -484,10 +476,13 @@ define([
 
         err: function (err) {
             console.log("Failed to get results from ? due to an error: ", err);
-            alert(error.name);
+            
             esri.hide(app.loading);
             app.map.enableMapNavigation();
             app.map.showZoomSlider();
+            $(function () {
+                $("#dialogWarning1").dialog("open");
+            });
         }
     }
     )

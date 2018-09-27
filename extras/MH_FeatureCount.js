@@ -35,37 +35,24 @@ define([
 
         GetCountOfFCDef_ShowText: function (strQuery, strURL, strHTML_ID, strStatType, strFieldName, strAddedQueryString) {
             this.strHTML_ID = strHTML_ID;
-            //Debug.writeln("mh_featurecount GetCountOfFCDef_ShowText :" + this.strHTML_ID);
-            
             disableOrEnableFormElements("dropdownForm", 'select-one', true);  //disable/enable to avoid user clicking query options during pending queries
             disableOrEnableFormElements("dropdownForm", 'button', true);  //disable/enable to avoid user clicking query options during pending queries
-  
+            $(".divOpenStats").prop("onclick", null).off("click");
+
             this.strURLStored = strURL;
-
-            if (this.strHTML_ID != "txtQueryResults") {
-                var temp = "";
-            }
-
             this.strQueryStored = strQuery;
             var pQueryTask = new esri.tasks.QueryTask(strURL + "?returnCountOnly=true");
             var pQuery = new esri.tasks.Query();
 
             pQuery.returnGeometry = false;
-            //var strQuery = pLayer.getDefinitionExpression();
-
             strQuery = strQuery.replace(" and (((SourceFeatureType = 'point') OR ( SourceFeatureType = 'poly' AND Wobbled_GIS = 1)) and (TypeAct not in ('Non-Spatial Plan', 'Non-Spatial Project'))", "");
             if (strQuery == "((SourceFeatureType = 'point') OR ( SourceFeatureType = 'poly' AND Wobbled_GIS = 1)) and (TypeAct not in ('Non-Spatial Plan', 'Non-Spatial Project'))") {
-                strQuery = "(objectid > 0) ";
+                strQuery = "(OBJECTID > 0) ";
             }
-            //strQuery = strQuery.replace(" and ((SourceFeatureType = 'point') OR ( SourceFeatureType = 'poly' AND Wobbled_GIS = 1))", "");
-            //if (strQuery == "(SourceFeatureType = 'point') OR ( SourceFeatureType = 'poly' AND Wobbled_GIS = 1)") {
-            //    strQuery = "(objectid > 0) ";
-            //}
 
             if (strAddedQueryString != "") {
                 strQuery += strAddedQueryString;
             }
-
             pQuery.where = strQuery;
             pQuery.returnGeometry = false;
             return pQueryTask.execute(pQuery, this.returnEvents, this.err);
@@ -75,14 +62,8 @@ define([
             var iStatValue = results.count;
             strDispaly = iStatValue.toString();
             if (this.strHTML_ID == "txtQueryResults") {
-                //Debug.writeln("mh_featurecount returnEvents" + strDispaly + ":" + this.strHTML_ID + ", supplemental");
-
-
                 strDispaly = strDispaly + " Resulting Efforts";
             }
-
-            //Debug.writeln("mh_featurecount returnEvents BEFORE CASE" + strDispaly + ":'" + this.strHTML_ID + "'");
-
 
             document.getElementById(this.strHTML_ID).innerHTML = strDispaly;
 
@@ -90,14 +71,23 @@ define([
                 case "txtQueryResults":
                     disableOrEnableFormElements("dropdownForm", 'select-one', false); //disable/enable to avoid user clicking query options during pending queries
                     disableOrEnableFormElements("dropdownForm", 'button', false);  //disable/enable to avoid user clicking query options during pending queries
+                    //$(".divOpenStats").prop("onclick", null).off("click");
+                    $(function () {
+                        $('.divOpenStats').click(function () {
+                            app.pSup.openCEDPSummary();
+                        });
+                    });
 
                     this.strHTML_ID = "dTotalProjectsQ"; //this is redundant but having issues with some of the callbacks ie. GRSG pop area = Crab Creek
-                    //app.PS_Uniques.qry_SetUniqueValuesOf("TypeAct", "TypeAct", document.getElementById("ddlMatrix"));
-                    //Debug.writeln("mh_featurecount returnEvents IN CASE" + strDispaly + ":" + this.strHTML_ID + ":" + this.strQueryStored +  " and (typeact = 'Project')");
 
                     app.pFC.GetCountOfFCDef_ShowText(this.strQueryStored, this.strURLStored + "0", "dTotalProjectsQ", "count", "project_id", " and (typeact = 'Spatial Project')");
                     break;
                 case "dTotalProjectsQ":
+                    if (iStatValue == 0) {
+                        document.getElementById("txt_NoSpatial").style.visibility = 'visible';
+                    } else {
+                        document.getElementById("txt_NoSpatial").style.visibility = 'hidden';
+                    }
                     this.strHTML_ID = "dTotalPlansQ"; //this is redundant but having issues with some of the callbacks ie. GRSG pop area = Crab Creek
                     app.pFC.GetCountOfFCDef_ShowText(this.strQueryStored, this.strURLStored + "0", "dTotalNonProjectsQ", "count", "project_id", " and (typeact = 'Non-Spatial Project')");
                     break;
@@ -108,7 +98,6 @@ define([
                     break;
 
                 case "dTotalPlansQ":
-
                     app.gQuerySummary.Summarize(this.strQueryStored, "", false);
 
                     break;
@@ -118,6 +107,9 @@ define([
         err: function (err) {
             console.log("Failed to get stat results due to an error: ", err);
             this.app.pFC.numberOfErrors += 1;
+            $(function () {
+                $("#dialogWarning1").dialog("open");
+            });
             if (this.app.pFC.numberOfErrors < 5) {
                 this.app.pFC.GetCountOfFCDef_ShowText(this.app.pFC.strQueryStored, this.app.pFC.strURLStored, "txtQueryResults", "count", "project_id");
             }
