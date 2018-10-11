@@ -1,8 +1,5 @@
-﻿//Created By:  Matt Heller, Great Northern Landscape Conservation Cooperative / U.S. Fish and Wildlife Service
-//Date:        Oct 2014
-
-
-
+﻿///Created By:  Matt Heller,  U.S. Fish and Wildlife Service, Science Applications, Region 6
+//Date:        Oct 2014, Updated Oct 2018
 
 function btn_TextSummary_click() {
     var strddlMatrix = document.getElementById("ddlMatrix").options[document.getElementById("ddlMatrix").selectedIndex].value;
@@ -54,7 +51,7 @@ function btn_TextSummary_click() {
         strQuery += "&MU=" + strManagUnit; //management unit
     }
     if (strQuery !== "") {
-        var strURL = "https://conservationefforts.org/sgce/sgcedquery/" + strQuery.replace('&', '?');
+        var strURL = "/sgce/sgcedquery/" + strQuery.replace('&', '?');
         window.open(strURL);
     }
 }
@@ -996,7 +993,7 @@ define([
               var strA_Managementunit = getTokens()['MU'];
 
               parser.parse();
-              //https://conservationefforts.org/grsgmap/?IP=11,14,16&TA=3&ST=183,985,1992,4512,9901,12665,15561,19432
+              //?IP=11,14,16&TA=3&ST=183,985,1992,4512,9901,12665,15561,19432
               if ((strA_TypeAct) || (strA_entry_type) || (strA_activity) || (strA_Subactivity) || (strA_implementing_party) || (strA_State) || (strA_POPArea) || (strA_Managementunit || strA_office)) {
                   var botContainer = registry.byId("bottomTableContainer");
 
