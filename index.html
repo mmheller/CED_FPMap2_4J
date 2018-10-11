@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--Created By:  Matt Heller,  U.S. Fish and Wildlife Service, Science Applications, Region 6
 Date:        Oct 2014, Updated Oct 2018-->
 {% load staticfiles %}
@@ -139,7 +139,7 @@ Date:        Oct 2014, Updated Oct 2018-->
                 <br />
                 <form id="dropdownForm">
 
-                    <center><h2>Filter/Query Data<img id="ImgResultsLoading" src="{% static 'ced_main/images/grsgmap/loading.gif' %}" style="height:15px" /></h2></center>
+                    <center><h2 title="To Filter/Query Data, select any of the dropdown filter options or use the 'Select Efforts On Map Tool' to spatially select conservation efforts.  Click the 'Clear' button to clear search criteria and return to full map extent.  Searching and zooming by Plan/Project name, or general geographic location name, is also available below">Filter/Query Data<img id="ImgResultsLoading" src="{% static 'ced_main/images/grsgmap/loading.gif' %}" style="height:15px" /></h2></center>
                     <!--<center><h2 title="To Filter/Query Data, select any of the dropdown filter options or use the 'Select Efforts On Map Tool' to spatially select conservation efforts.  Click the 'Clear' button to clear search criteria and return to full map extent.  Searching and zooming by Plan/Project name, or general geographic location name, is also available below">Filter/Query Data<img id="ImgResultsLoading" src="images/loading.gif" style="height:15px" /></h2></center>-->
 
                     <!---->
@@ -147,8 +147,6 @@ Date:        Oct 2014, Updated Oct 2018-->
                     <font size="2" title="Non-Spatial Projects or Non-Spatial Plans selections will provice results in the table and summaries, however NO efforts will show in the map"><u>Project or Plan:</u></font><br />
                     <select id="ddlMatrix" class="selectClass" disabled>
                         <option value="All">All</option>
-                        <!--                      <option value="Project">Project</option>
-            <option value="Plan">Plan</option>-->
                     </select><br /><br />
 
                     <font size="2" title="Efforts that are 'In Progress' have been only partially implemented and have not been completed. A conservation effort that would be considered 'Completed' no longer requires further actions aside from post-treatment monitoring (effectiveness monitoring), or maintenance.  No efforts designated as 'Planned' are available for viewing or reporting" ><u>Implementation Status:</u></font><br />
@@ -268,7 +266,8 @@ Date:        Oct 2014, Updated Oct 2018-->
 
                     <div id="pDivOpenStats" class="divOpenStats" onmouseover="" style="cursor: pointer;">
                         <div id="imageReport">
-                            <img src="images/report.png" alt="Click for summary report" height="22px" width="19px" />
+                            <img src="{% static 'ced_main/images/grsgmap/report.png' %}" alt="Click for summary report" height="22px" width="19px" />
+                            <!--<img src="images/report.png" alt="Click for summary report" height="22px" width="19px" />-->
                         </div>
                         <div id="txtReport" title="Click this link for the comprehensive CED summary report.  The summary report includes various report summaries, charts, map, and 'Print Report to PDF' options">
                             <b><u><I><font size="3px" color="white">Click</font> <font size="3px" color="blue">here</font> <font size="3px" color="white">for summary report...</font></I></u></b>
@@ -286,7 +285,8 @@ Date:        Oct 2014, Updated Oct 2018-->
 
                 <div id="txt_xyCoords" style="position:absolute; left:25px; bottom:1px; color:#404040; z-index:50; font-size:11px"></div>
                 <div id="txt_Version" style="position:absolute; right:15px; bottom:20px; color:#404040; z-index:50; font-size:11px">CED Interactive Map Version 2.1.0</div>
-                <img id="loadingImg" src="images/loading.gif" style="position:fixed; right:40%; top:50%; z-index:100;" />
+                <img id="loadingImg" src="{% static 'ced_main/images/grsgmap/loading.gif' %}" style="position:fixed; right:40%; top:50%; z-index:100;" />
+                <!--<img id="loadingImg" src="images/loading.gif" style="position:fixed; right:40%; top:50%; z-index:100;" />-->
 
                 <div id="dialogWarning1" title="CED Data Retreival Error!">
                     <p>The CED is currently unable to connect to our data repository, ArcGIS Online.<br /><br />Please try back again later. If the problem persists, please contact the CED team for additional support at fw1sagegrouseced@fws.gov</p>
@@ -324,11 +324,11 @@ Date:        Oct 2014, Updated Oct 2018-->
         <img id="theImage4" border="0" src="{% static 'ced_main/images/ced_main/CEDlogo_white_180x31.png' %}"
              style="position:absolute; top:20px; left:18px;" height="45" />
     </a>
-    <a href="http://www.fws.gov" target="_blank">
+    <a href="https://www.fws.gov" target="_blank">
         <img id="theImage3" border="0" src="{% static 'ced_main/images/ced_main/USFWS_150x31.png' %}"
              style="position:absolute; top:25px; left:325px;" height="35" />
     </a>
-    <a href="http://www.usgs.gov" target="_blank">
+    <a href="https://www.usgs.gov" target="_blank">
         <img id="theImage2" border="0" src="{% static 'ced_main/images/ced_main/USGS_117x31.png' %}"
              style="position:absolute; top:25px; left:505px;" height="35" />    </a>
 
@@ -337,11 +337,11 @@ Date:        Oct 2014, Updated Oct 2018-->
         <img id="theImage4" border="0" src="images/CEDlogo_white_180x31.png"
              style="position:absolute; top:20px; left:18px;" height="45" />
     </a>
-    <a href="http://www.fws.gov" target="_blank">
+    <a href="https://www.fws.gov" target="_blank">
         <img id="theImage3" border="0" src="images/USFWS_150x31.png"
              style="position:absolute; top:25px; left:325px;" height="35" />
     </a>
-    <a href="http://www.usgs.gov" target="_blank">
+    <a href="https://www.usgs.gov" target="_blank">
         <img id="theImage2" border="0" src="images/USGS_117x31.png"
              style="position:absolute; top:25px; left:505px;" height="35" />-->
     </a>

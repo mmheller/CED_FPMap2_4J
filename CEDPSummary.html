@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--Created By:  Matt Heller,  U.S. Fish and Wildlife Service, Science Applications, Region 6
 Date:        Oct 2014, Updated Oct 2018-->
 
@@ -96,20 +96,37 @@ Date:        Oct 2014, Updated Oct 2018-->
             strDivID4WhiteSpace = "dWhiteSpace" + i.toString();
         }
             
+
+        
+
         app.base64Img1 = null;
         app.base64Img2 = null;
         app.base64Img3 = null;
-        imgToBase64('http://mmheller.github.io/testCED/images/CEDlogo_white_180x31.jpg', function (base64) {
+        imgToBase64("{% static 'ced_main/images/ced_main/CEDlogo_white_180x31.png' %}", function (base64) {
             app.base64Img1 = base64;
         })
         var base64Img2 = null;
-        imgToBase64('http://mmheller.github.io/testCED/images/USFWS_150x31.jpg', function (base64) {
+        imgToBase64("{% static 'ced_main/images/ced_main/USFWS_150x31.png' %}", function (base64) {
             app.base64Img2 = base64;
         })
         var base64Img3 = null;
-        imgToBase64('http://mmheller.github.io/testCED/images/USGS_117x31.jpg', function (base64) {
+        imgToBase64("{% static 'ced_main/images/ced_main/USGS_117x31.png' %}", function (base64) {
             app.base64Img3 = base64;
         })
+
+        //imgToBase64('https://mmheller.github.io/testCED/images/CEDlogo_white_180x31.png', function (base64) {
+        //    app.base64Img1 = base64;
+        //})
+        //var base64Img2 = null;
+        //imgToBase64('https://mmheller.github.io/testCED/images/USFWS_150x31.png', function (base64) {
+        //    app.base64Img2 = base64;
+        //})
+        //var base64Img3 = null;
+        //imgToBase64('https://mmheller.github.io/testCED/images/USGS_117x31.png', function (base64) {
+        //    app.base64Img3 = base64;
+        //})
+
+
         
         pdfMargins = { top: 40, bottom: 40, left: 30,width: 624};
         esriConfig.defaults.io.corsEnabledServers.push("https://utility.arcgis.com")
@@ -197,30 +214,33 @@ Date:        Oct 2014, Updated Oct 2018-->
             <tr>
                 <td class="auto-style1">
                     <a href="/sgce/" target="_blank"> <img id="theImage4" border="0" src="{% static 'ced_main/images/ced_main/CEDlogo_white_180x31.png' %}" style="position: absolute; left: 15px; top: 18px; height: 35px;" /></a>
-                    <a href="http://www.fws.gov" target="_blank"> <img id="theImage3" border="0" src="{% static 'ced_main/images/ced_main/USFWS_150x31.png' %}" height="36" /></a>&nbsp;&nbsp;
-                    <a href="http://www.usgs.gov" target="_blank"><img id="theImage2" border="0" src="{% static 'ced_main/images/ced_main/USGS_117x31.png' %}" height="36" /></a>&nbsp;&nbsp;
+                    <a href="https://www.fws.gov" target="_blank"> <img id="theImage3" border="0" src="{% static 'ced_main/images/ced_main/USFWS_150x31.png' %}" height="36" /></a>&nbsp;&nbsp;
+                    <a href="https://www.usgs.gov" target="_blank"><img id="theImage2" border="0" src="{% static 'ced_main/images/ced_main/USGS_117x31.png' %}" height="36" /></a>&nbsp;&nbsp;
 
                     <!--<a href="/sgce/" target="_blank"> <img id="theImage4" border="0" src="images/CEDlogo_white_180x31.png" style="position: absolute; left: 15px; top: 18px; height: 35px;" /></a>
-                    <a href="http://www.fws.gov" target="_blank"> <img id="theImage3" border="0" src="images/USFWS_150x31.png" height="36" /></a>&nbsp;&nbsp;
-                    <a href="http://www.usgs.gov" target="_blank"><img id="theImage2" border="0" src="images/USGS_117x31.png" height="36" /></a>&nbsp;&nbsp;-->
+                    <a href="https://www.fws.gov" target="_blank"> <img id="theImage3" border="0" src="images/USFWS_150x31.png" height="36" /></a>&nbsp;&nbsp;
+                    <a href="https://www.usgs.gov" target="_blank"><img id="theImage2" border="0" src="images/USGS_117x31.png" height="36" /></a>&nbsp;&nbsp;-->
 
                 </td>
             </tr>
         </table>
         <div style="height:15px; position: absolute; top: 70px; right: 10px">
-            <img id="ImgResultsLoading" src="images/loading.gif" style="height:15px;" /><button onclick="generate()">Print Report to PDF</button>
+            <!--<img id="ImgResultsLoading" src="images/loading.gif" style="height:15px;" /><button onclick="generate()">Print Report to PDF</button>-->
+            <img id="ImgResultsLoading" src="{% static 'ced_main/images/grsgmap/loading.gif' %}" style="height:15px;" /><button onclick="generate()">Print Report to PDF</button>
         </div>
         <b>Conservation Efforts Database v2.1</b><br />
         <b>Interactive Map - Summary Report</b>
     
         <div id="mapSum"
              style="overflow:hidden; background-color:rgb(151, 118, 123);">
-            <img id="loadingImg" src="images/loading.gif" style="position:fixed; left:30%; top:30%; z-index:100;" />
+            <!--<img id="loadingImg" src="images/loading.gif" style="position:fixed; left:30%; top:30%; z-index:100;" />-->
+            <img id="loadingImg" src="{% static 'ced_main/images/grsgmap/loading.gif' %}" style="position:fixed; left:30%; top:30%; z-index:100;" />
         </div>
 
         <div id="panelBasemapsSum" class="panelBasemapsSum bg rounded shadow">
             <!-- Panel Basemaps -->
-            <div id="basemapTitleSum"><img src="images/basemaps.png" height="30" title="Switch Base Map" /></div>
+            <!--<div id="basemapTitleSum"><img src="images/basemaps.png" height="30" title="Switch Base Map" /></div>-->
+            <div id="basemapTitleSum"><img src="{% static 'ced_main/images/grsgmap/basemaps.gif' %}" height="30" title="Switch Base Map" /></div>
             <div id="basemapContent">
                 <div id="basemapGallerySummary"></div>
             </div>

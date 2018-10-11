@@ -2,8 +2,8 @@
 //Date:        Oct 2014, Updated Oct 2018
 
 
-// You could either use a function similar to this or pre convert an image with for example http://dopiaza.org/tools/datauri
-// http://stackoverflow.com/questions/6150289/how-to-convert-image-into-base64-string-using-javascript
+// You could either use a function similar to this or pre convert an image with for example https://dopiaza.org/tools/datauri
+// https://stackoverflow.com/questions/6150289/how-to-convert-image-into-base64-string-using-javascript
 function imgToBase64(url, callback, imgVariable) {
     if (!window.FileReader) {
         callback(null);
