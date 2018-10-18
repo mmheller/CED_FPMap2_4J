@@ -473,10 +473,10 @@ define([
               var pBase_Breed = new FeatureLayer(strBase_URL + "4", { id: "Breed", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
               var pBase_PI = new FeatureLayer(strBase_URL + "5", { id: "PI", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
               var pBase_Eco = new FeatureLayer(strBase_URL + "6", { id: "Eco", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
-              var pBase_PHMA = new FeatureLayer(strBase_URL + "7", { id: "PHMA", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
-              var pBase_GHMA = new FeatureLayer(strBase_URL + "8", { id: "GHMA", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
-              var pBase_SMA = new FeatureLayer(strBase_URL + "9", { id: "SMA", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
-              var pBase_PAC = new FeatureLayer(strBase_URL + "10", { id: "PAC", "opacity": 0.8, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
+              var pBase_BLMHMA = new FeatureLayer(strBase_URL + "7", { id: "BLMMA", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
+              //var pBase_GHMA = new FeatureLayer(strBase_URL + "8", { id: "GHMA", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
+              var pBase_SMA = new FeatureLayer(strBase_URL + "8", { id: "SMA", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
+              var pBase_PAC = new FeatureLayer(strBase_URL + "9", { id: "PAC", "opacity": 0.8, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
 
               var vGreyColor = new Color("#666");              // create a text symbol to define the style of labels
               var pLabel1 = new TextSymbol().setColor(vGreyColor);
@@ -495,8 +495,8 @@ define([
 
               legendLayers.push({ layer: pBase_PAC, title: 'GRSG Priority Areas for Conservation (PACs)' });
               legendLayers.push({ layer: pBase_SMA, title: 'Land Ownership (Surface Management Agency, BLM 2015)' });
-              legendLayers.push({ layer: pBase_GHMA, title: 'GRSG General Habitat Management Areas (GHMA + OHMA [NV, UT]) (BLM/USFS 2015)' });
-              legendLayers.push({ layer: pBase_PHMA, title: 'GRSG Priority Habitat Management Areas (PHMA + IHMA [ID]) (BLM/USFS 2015)' });
+              //legendLayers.push({ layer: pBase_GHMA, title: 'GRSG General Habitat Management Areas (GHMA + OHMA [NV, UT]) (BLM/USFS 2015)' });
+              legendLayers.push({ layer: pBase_BLMHMA, title: 'GRSG BLM Habitat Management Areas (PHMA + IHMA [ID]) (BLM/USFS 2015)' });
               legendLayers.push({ layer: pBase_Eco, title: 'Ecosystem Resilience & Resistance (R&R) (Chambers et al. 2014, 2016)' });
               legendLayers.push({ layer: pBase_RRP, title: 'GRSG Pop’l’n Index (High/Low (80% threshold)) + R&R (Chambers et al. 2017 )' });
               legendLayers.push({ layer: pBase_RRB, title: 'GRSG Breeding Habitat Dist. + R&R (Chambers et al. 2017)' });
@@ -513,10 +513,27 @@ define([
 
               var cbxLayers = [];
 
-              cbxLayers.push({ layers: [pBase_PAC, pBase_PAC], title: 'GRSG Priority Areas for Conservation (PACs)' });
-              cbxLayers.push({ layers: [pBase_SMA, pBase_SMA], title: 'Land Ownership<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<a href="https://landscape.blm.gov/geoportal/catalog/search/resource/details.page?uuid=%7BB425E538-FC75-4B70-B287-4AEC6F9017DB%7D" target="_blank">(Surface Management Agency, BLM 2015)</a>' });
-              cbxLayers.push({ layers: [pBase_GHMA, pBase_GHMA], title: 'GRSG General Habitat Management Areas<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp(GHMA + OHMA [NV, UT])<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<a href="https://landscape.blm.gov/geoportal/catalog/search/resource/details.page?uuid=%7BB0348167-81B5-481E-80CB-BF28B1587988%7D" target="_blank">(BLM/USFS 2015)</a>' });
-              cbxLayers.push({ layers: [pBase_PHMA, pBase_PHMA], title: 'GRSG Priority Habitat Management Areas<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp(PHMA + IHMA [ID])<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<a href="https://landscape.blm.gov/geoportal/catalog/search/resource/details.page?uuid=%7B8D87923A-E3C5-4853-80C3-4399CC5C9E53%7D" target="_blank">(BLM/USFS 2015)</a>' });
+              cbxLayers.push({ layers: [pBase_PAC, pBase_PAC], title: 'GRSG Priority Areas for Conservation (PACs)' +
+                                                                      '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<i title="This polygon data set represents all sage-grouse Priority Areas for Conservation (PACs) identified in the 2013 Greater Sage-Grouse Conservation Objectives Team (COT) Report. PACs represent areas identified as essential for the long-term conservation of the sage-grouse. The COT determined that the PACs are key for the conservation of the species range wide.">more..., </i>' +
+                                                                      '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<a href="https://www.sciencebase.gov/catalog/item/56f96d88e4b0a6037df066a3" target="_blank">Team (COT) Report, 2014</a>'
+              });
+              cbxLayers.push({
+                  layers: [pBase_SMA, pBase_SMA], title: 'Land Ownership' +
+                                                                      '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<i title="The Surface Management Agency (SMA) Geographic Information System (GIS) dataset depicts Federal land for the United States and classifies this land by its active Federal surface managing agency.">more..., </i>' +
+                                                                      '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<a href="https://landscape.blm.gov/geoportal/catalog/search/resource/details.page?uuid=%7B2A8B8906-7711-4AF7-9510-C6C7FD991177%7D" target="_blank">(Surface Management Agency, BLM 2015)</a>'
+              });
+
+              //cbxLayers.push({ layers: [pBase_GHMA, pBase_GHMA], title: 'GRSG General Habitat Management Areas<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp(GHMA + OHMA [NV, UT])<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<a href="https://landscape.blm.gov/geoportal/catalog/search/resource/details.page?uuid=%7BB0348167-81B5-481E-80CB-BF28B1587988%7D" target="_blank">(BLM/USFS 2015)</a>' });
+              cbxLayers.push({
+                  layers: [pBase_BLMHMA, pBase_BLMHMA], title: 'GRSG Habitat Management Areas' +
+                                                               '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<i title="This dataset represents the consolidated submissions of GRSG habitat management areas from each individual BLM ARMP & ARMPA/Records of Decision (ROD) and for subsequent updates. These data were submitted to the BLM’s Wildlife Habitat Spatial Analysis Lab in March 2016 and were updated for UT in April of 2017 and WY in October of 2017. All of the data used to create this file was submitted by the EIS.">more..., </i>' +
+                                                               '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<a href="https://landscape.blm.gov/geoportal/catalog/search/resource/details.page?uuid=%7BECEEE1DF-9B8A-478D-874B-C6FF315A7585%7D" target="_blank">(Habitat Management Areas, BLM 2017)</a>'
+
+                  
+              });
+
+
+
               cbxLayers.push({ layers: [pBase_Eco, pBase_Eco], title: 'Ecosystem Resilience & Resistance (R&R)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp(Chambers et al. 2014, 2016)' });
               cbxLayers.push({ layers: [pBase_RRP, pBase_RRP], title: 'GRSG Pop’l’n Index (High/Low (80% threshold)) + R&R<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp(Chambers et al. 2017 )' });
               cbxLayers.push({ layers: [pBase_RRB, pBase_RRB], title: 'GRSG Breeding Habitat Dist. + R&R<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp(Chambers et al. 2017)' });
@@ -525,10 +542,19 @@ define([
               cbxLayers.push({ layers: [CED_PP_poly, CED_PP_poly], title: 'CED Plans and Projects (area)' });
               cbxLayers.push({ layers: [CED_PP_point, CED_PP_point], title: 'CED Plans and Projects (point)' });
               cbxLayers.push({ layers: [CED_PP_line, CED_PP_line], title: 'CED Plans and Projects (line)' });
-              cbxLayers.push({ layers: [pBase_Pop, plabels1], title: 'GRSG Populations' });
-              cbxLayers.push({ layers: [pBase_MZ, plabels2], title: 'WAFWA Management Zones' });
+              cbxLayers.push({
+                  layers: [pBase_Pop, plabels1], title: 'GRSG Populations' +
+                                                         '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<i title="This data set represents greater sage-grouse populations to be used in work for the US Fish and Wildlife (USFWS) 2015 Status Review for the greater sage-grouse. Populations do not represent occupied habitat. Population polygons are meant to coarsely identify areas of occupation based on encircling groups of leks. Boundaries taken from BLM/WAFWA revised population boundaries (‘COT_SG_Populations_2014_WAFWA_UT’ data layer). The original data layer was slightly modified for the USFWS 2015 Status Review...">more..., </i>' +
+                                                         '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<a href="https://www.sciencebase.gov/catalog/item/56f96f78e4b0a6037df06b0f" target="_blank">USFWS, ES 2014</a>'
+              });
 
-              arrayLayers = [pBase_PAC, pBase_SMA, pBase_GHMA, pBase_PHMA, pBase_Eco, pBase_RRP, pBase_RRB, pBase_Breed, pBase_PI, pBase_MZ, pBase_Pop, plabels1, plabels2, CED_PP_poly, CED_PP_line, CED_PP_point, this.gCED_PP_point4FeatureTable];
+              cbxLayers.push({
+                  layers: [pBase_MZ, plabels2], title: 'WAFWA Management Zones' +
+                                                                      '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<i title="The Greater Sage-grouse Comprehensive Conservation Strategy developed sage-grouse management zones determined by sage-grouse populations and sub-populations identified within seven floristic provinces.">more..., </i>' +
+                                                                      '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<a href="https://www.wafwa.org/Documents%20and%20Settings/37/Site%20Documents/Initiatives/Sage%20Grouse/Primer%203%20SGMapping%20&%20Priority%20Habitats1.2.pdf" target="_blank">WAFWA</a>'
+              });
+
+              arrayLayers = [pBase_PAC, pBase_SMA, pBase_BLMHMA, pBase_Eco, pBase_RRP, pBase_RRB, pBase_Breed, pBase_PI, pBase_MZ, pBase_Pop, plabels1, plabels2, CED_PP_poly, CED_PP_line, CED_PP_point, this.gCED_PP_point4FeatureTable];
               app.map.addLayers(arrayLayers);
 
               dojo.connect(app.map, 'onLayersAddResult', function (results) {            //add check boxes 

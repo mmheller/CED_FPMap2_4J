@@ -158,10 +158,10 @@ function startExport2PDF() {
     $("#dGISMZ").css("font-size", "10px");// original value
     $("#dGISSMA").css("font-family", "helvetica");// change property value
     $("#dGISSMA").css("font-size", "10px");// original value
-    $("#dGISGHMA").css("font-family", "helvetica");// change property value
-    $("#dGISGHMA").css("font-size", "10px");// original value
-    $("#dGISPHMA").css("font-family", "helvetica");// change property value
-    $("#dGISPHMA").css("font-size", "10px");// original value
+    $("#dGISBLMHMA").css("font-family", "helvetica");// change property value
+    $("#dGISBLMHMA").css("font-size", "10px");// original value
+    ////$("#dGISPHMA").css("font-family", "helvetica");// change property value
+    ////$("#dGISPHMA").css("font-size", "10px");// original value
     $("#dGISRMZ").css("font-family", "helvetica");// change property value
     $("#dGISRMZ").css("font-size", "10px");// original value
     $("#dGISAB").css("font-family", "helvetica");// change property value
@@ -234,14 +234,14 @@ function startExport2PDF() {
                     return true;                      // true = "handled elsewhere, bypass text extraction"
                 },
                 
-                '#dGISGHMA_COLUMNCHART': function (element, renderer) {
-                    AddChartImage2PDF(pdf, "dGISGHMA_COLUMNCHART", renderer.pdf.internal.pages.length - 1, renderer.pdf.tableHeaderRow[0][1] + 25);
+                '#dGISBLMHMA_COLUMNCHART': function (element, renderer) {
+                    AddChartImage2PDF(pdf, "dGISBLMHMA_COLUMNCHART", renderer.pdf.internal.pages.length - 1, renderer.pdf.tableHeaderRow[0][1] + 25);
                     return true;                      // true = "handled elsewhere, bypass text extraction"
                 },
-                '#dGISPHMA_COLUMNCHART': function (element, renderer) {
-                    AddChartImage2PDF(pdf, "dGISPHMA_COLUMNCHART", renderer.pdf.internal.pages.length - 1, renderer.pdf.tableHeaderRow[0][1] + 25);
-                    return true;                      // true = "handled elsewhere, bypass text extraction"
-                },
+                //'#dGISPHMA_COLUMNCHART': function (element, renderer) {
+                //    AddChartImage2PDF(pdf, "dGISPHMA_COLUMNCHART", renderer.pdf.internal.pages.length - 1, renderer.pdf.tableHeaderRow[0][1] + 25);
+                //    return true;                      
+                //},
                 
                 '#dGISAB_PIECHART': function (element, renderer) {
                     AddChartImage2PDF(pdf, "dGISAB_PIECHART", renderer.pdf.internal.pages.length - 1, renderer.pdf.tableHeaderRow[0][1] + 25);

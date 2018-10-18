@@ -178,8 +178,7 @@ define([
                                        "dGISMZ_PIECHART",
                                        "dGISRMZ_PIECHART",
                                        "dGISAB_PIECHART",
-                                       "dGISGHMA_COLUMNCHART",
-                                       "dGISPHMA_COLUMNCHART",
+                                       "dGISBLMHMA_COLUMNCHART",
                                        "dGISBD_PIECHART",
                                        "dGISBP_PIECHART",
                                        "dGISIDX_PIECHART"];
