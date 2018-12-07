@@ -18,10 +18,10 @@
 
 input.button-SelectOnMap {
     /* referencing image in Matt's local dev env*/
-    background-image: url(../images/SelectionSelectTool32.png);/* 16px x 16px */
+    /*background-image: url(../images/SelectionSelectTool32.png);/* 16px x 16px */*/
 
     /* referencing image in CED Django env*/
-    /*background-image: url(static("ced_main/images/grsgmap/SelectionSelectTool32.gif"));*/
+    background-image: url(static("ced_main/images/grsgmap/SelectionSelectTool32.gif"));
 
     background-color: transparent; /* make the button transparent */
     background-repeat: no-repeat;  /* make the background image appear only once */
@@ -318,6 +318,10 @@ input.button-SelectOnMap {
          font-family: helvetica;
      }
      
+     .centerElement {
+        text-align: center;
+     }
+
      .dijitAccordionContainer
      {
          height:calc(100% - 170px);
@@ -327,10 +331,10 @@ input.button-SelectOnMap {
 
         .palette3Icon {
             /* referencing image in Matt's local dev env*/
-            background-image: url(../images/palette3.png);
+            /*background-image: url(../images/palette3.png);*/
             
             /* referencing image in CED Django env*/
-            /*background-image: url(static("ced_main/images/grsgmap/palette3.gif"));*/
+            background-image: url(static("ced_main/images/grsgmap/palette3.gif"));
 
             background-repeat: no-repeat;
             background-position: center center;
@@ -342,10 +346,10 @@ input.button-SelectOnMap {
         
         .Find32Icon {
             /* referencing image in Matt's local dev env*/
-            background-image: url(../images/Find32.png);
+            /*background-image: url(../images/Find32.png);*/
 
             /* referencing image in CED Django env*/
-            /*background-image: url(static("ced_main/images/grsgmap/Find32.gif"));*/
+            background-image: url(static("ced_main/images/grsgmap/Find32.gif"));
 
             background-repeat: no-repeat;
             background-position: center center;
