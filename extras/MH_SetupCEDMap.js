@@ -1,6 +1,10 @@
 ﻿///Created By:  Matt Heller,  U.S. Fish and Wildlife Service, Science Applications, Region 6
 //Date:        Oct 2014, Updated Oct 2018
 
+$(function () {
+	$("#dialogMap").dialog();
+});
+
 function btn_TextSummary_click() {
     var strddlMatrix = document.getElementById("ddlMatrix").options[document.getElementById("ddlMatrix").selectedIndex].value;
     var strddlEntry = document.getElementById("ddlEntry").options[document.getElementById("ddlEntry").selectedIndex].value;
@@ -490,7 +494,7 @@ define([
 
               var pBase_RRP = new FeatureLayer(strBase_URL + "2", { id: "RRP", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
               var pBase_RRB = new FeatureLayer(strBase_URL + "3", { id: "RRB", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
-              var pBase_Breed = new FeatureLayer(strBase_URL + "4", { id: "Breed", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
+			  var pBase_Breed = new FeatureLayer(strBase_URL + "4", { id: "Breed", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
               var pBase_PI = new FeatureLayer(strBase_URL + "5", { id: "PI", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
               var pBase_Eco = new FeatureLayer(strBase_URL + "6", { id: "Eco", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });
               var pBase_BLMHMA = new FeatureLayer(strBase_URL + "7", { id: "BLMMA", "opacity": 0.5, mode: FeatureLayer.MODE_ONDEMAND, visible: false });

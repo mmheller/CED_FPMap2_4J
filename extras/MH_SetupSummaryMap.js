@@ -130,7 +130,7 @@ define([
               }
 
               app.strTheme1_URL = "https://utility.arcgis.com/usrsvcs/servers/5d5fc053dd7e4de4b9765f7a6b6f1f61/rest/services/CEDfrontpage_map_v9_Restrict/FeatureServer/";
-              dojo.connect(app.map, "onUpdateStart", showLoading);
+			  dojo.connect(app.map, "onUpdateStart", showLoading);
               dojo.connect(app.map, "onUpdateEnd", hideLoading);
 
               var legendLayers = [];
